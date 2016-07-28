@@ -4,7 +4,11 @@ ifndef CALL_W_CONTAINER
 $(error CALL_W_CONTAINER is not set)
 endif
 
-DOCKER_COMPOSE = $(call which,docker-compose)
+ifndef BUILD_IMAGE_TAG
+$(error BUILD_IMAGE_TAG is not set)
+endif
+
+BUILD_IMAGE := "$(REGISTRY)/$(ORG_NAME)/build:$(BUILD_IMAGE_TAG)"
 
 UTIL_TARGETS := wc_shell wc_% wdeps_% run_w_container_% check_w_container_%
 
@@ -24,6 +28,7 @@ run_w_container_%: check_w_container_%
 	res=$$? ; exit $$res ; \
 	}
 
+run_w_compose_%: DOCKER_COMPOSE = $(call which,docker-compose)
 run_w_compose_%: check_w_container_%
 	{ \
 	$(DOCKER_COMPOSE) up -d ; \
