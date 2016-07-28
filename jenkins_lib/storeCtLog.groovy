@@ -7,3 +7,5 @@ def call(String artiFacts) {
   }
 }
 
+return this;
+

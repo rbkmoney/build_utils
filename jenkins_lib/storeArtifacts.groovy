@@ -3,3 +3,6 @@ def call(String artiFacts) {
   sh "tar -czf ${archivedArtifacts} ${artiFacts}"
   step([$class: 'ArtifactArchiver', artifacts: archivedArtifacts, fingerprint: true])
 }
+
+return this;
+

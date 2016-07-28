@@ -4,3 +4,5 @@ def call(String name, Closure body) {
   body.call()
 }
 
+return this;
+
