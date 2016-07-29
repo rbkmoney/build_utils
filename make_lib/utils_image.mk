@@ -1,3 +1,5 @@
+# Building and pushing images
+
 ifndef UTILS_PATH
 $(error UTILS_PATH is not set)
 endif

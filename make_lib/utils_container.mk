@@ -1,3 +1,5 @@
+# Working with docker run and docker-compose
+
 ifndef UTILS_PATH
 $(error UTILS_PATH is not set)
 endif
