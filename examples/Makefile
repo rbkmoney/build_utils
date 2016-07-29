@@ -2,6 +2,7 @@ SERVICE_NAME := build_utils_demo
 
 # DEFAULT IMAGE_TAG
 IMAGE_TAG ?= $(shell whoami_`date +'%s'`)
+PUSH_IMAGE_TAG ?= $(IMAGE_TAG)
 
 BASE_IMAGE_NAME := service_base
 BASE_IMAGE_TAG := 6de9b3b

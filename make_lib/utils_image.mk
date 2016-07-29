@@ -30,9 +30,9 @@ do_push_image:
 
 Dockerfile: $(call validate_templates_path) $(TEMPLATES_PATH)/Dockerfile.sh
 	if [ -n "$(BASE_IMAGE_NAME)" ] && [ -n "$(BASE_IMAGE_TAG)" ]; then \
-	export BASE_IMAGE="$(REGISTRY)/$(ORG_NAME)/$(BASE_IMAGE_NAME):$(BASE_IMAGE_TAG)" && \
-	export BASE_IMAGE_TAG=$(BASE_IMAGE_TAG) && \
-	export BUILD_IMAGE_TAG=$(BUILD_IMAGE_TAG) && \
+	BASE_IMAGE="$(REGISTRY)/$(ORG_NAME)/$(BASE_IMAGE_NAME):$(BASE_IMAGE_TAG)" \
+	BASE_IMAGE_TAG=$(BASE_IMAGE_TAG) \
+	BUILD_IMAGE_TAG=$(BUILD_IMAGE_TAG) \
 	$(TEMPLATES_PATH)/Dockerfile.sh > Dockerfile; \
 	else \
 	echo "Error: BASE_MAGE_NAME and BASE_IMAGE_TAG are required!" && exit 1; \

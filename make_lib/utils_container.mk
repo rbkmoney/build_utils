@@ -43,8 +43,8 @@ run_w_compose_%: check_w_container_% gen_compose_file
 	}
 
 gen_compose_file: $(call validate_templates_path)
-	export SERVICE_NAME=$(SERVICE_NAME) && \
-	export BUILD_IMAGE_TAG=$(BUILD_IMAGE_TAG) && \
+	SERVICE_NAME=$(SERVICE_NAME) \
+	BUILD_IMAGE_TAG=$(BUILD_IMAGE_TAG) \
 	$(TEMPLATES_PATH)/docker-compose.sh > docker-compose.yml
 
 check_w_container_%:
