@@ -1,4 +1,8 @@
-include utils_common.mk
+ifndef UTILS_PATH
+$(error UTILS_PATH is not set)
+endif
+
+include $(UTILS_PATH)/utils_common.mk
 
 ifndef CALL_W_CONTAINER
 $(error CALL_W_CONTAINER is not set)
@@ -24,12 +28,12 @@ wdeps_%:
 
 run_w_container_%: check_w_container_%
 	{ \
-	$(DOCKER) run --rm -v $$PWD:$$PWD --workdir $$PWD $(BUILD_IMAGE) make $* ; \
+	$(DOCKER) run --rm -v $$PWD:$$PWD --workdir $$PWD $(BUILD_IMAGE) /bin/bash -c 'pwd ; make $*' ; \
 	res=$$? ; exit $$res ; \
 	}
 
 run_w_compose_%: DOCKER_COMPOSE = $(call which,docker-compose)
-run_w_compose_%: check_w_container_%
+run_w_compose_%: check_w_container_% gen_compose_file
 	{ \
 	$(DOCKER_COMPOSE) up -d ; \
 	$(DOCKER_COMPOSE) exec -T $(SERVICE_NAME) make $* ; \
@@ -37,6 +41,11 @@ run_w_compose_%: check_w_container_%
 	$(DOCKER_COMPOSE) down ; \
 	exit $$res ; \
 	}
+
+gen_compose_file: $(call validate_templates_path)
+	export SERVICE_NAME=$(SERVICE_NAME) && \
+	export BUILD_IMAGE_TAG=$(BUILD_IMAGE_TAG) && \
+	$(TEMPLATES_PATH)/docker-compose.sh > docker-compose.yml
 
 check_w_container_%:
 	$(if $(filter $*,$(CALL_W_CONTAINER)),,\

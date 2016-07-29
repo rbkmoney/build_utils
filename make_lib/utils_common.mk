@@ -13,3 +13,11 @@ which = $(if $(shell which $(1) 2>/dev/null),\
 
 DOCKER = $(call which,docker)
 
+validate_templates_path = $(shell if [ -n "$(TEMPLATES_PATH)" ]; then \
+	if [ ! -d "$(TEMPLATES_PATH)" ]; then \
+	echo "Error: $(TEMPLATES_PATH) does not exist!" && exit 1; \
+	fi; \
+	else \
+	echo "Error: TEMPLATES_PATH is not set!" && exit 1; \
+	fi)
+
