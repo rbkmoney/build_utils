@@ -7,6 +7,9 @@ CMD /opt/dummy_service/bin/dummy_service.sh foreground
 LABEL base_image_version=$BASE_IMAGE_TAG
 LABEL build_image_version=$BUILD_IMAGE_TAG
 LABEL service_commit=$(git rev-parse HEAD)
+# A bit of magic to get a proper branch name
+# even when the HEAD is detached (Hey Jenkins!
+# BRANCH_NAME is available in Jenkins env).
 LABEL service_branch=$( \
   if [ "HEAD" != $(git rev-parse --abbrev-ref HEAD) ]; then \
     echo $(git rev-parse --abbrev-ref HEAD); \
