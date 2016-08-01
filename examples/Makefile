@@ -24,7 +24,7 @@ BASE_IMAGE_TAG := 6de9b3b
 ## Variables required for utils_container.mk
 
 # Build image tag to be used
-BUILD_IMAGE_TAG := latest
+BUILD_IMAGE_TAG := 530114ab63a7ff0379a2220169a0be61d3f7c64c
 
 CALL_W_CONTAINER := all smoke_test
 
