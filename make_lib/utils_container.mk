@@ -6,10 +6,6 @@ endif
 
 include $(UTILS_PATH)/utils_common.mk
 
-ifndef CALL_W_CONTAINER
-$(error CALL_W_CONTAINER is not set)
-endif
-
 ifndef BUILD_IMAGE_TAG
 $(error BUILD_IMAGE_TAG is not set)
 endif
@@ -70,6 +66,7 @@ gen_compose_file: $(call validate_templates_path)
 	$(TEMPLATES_PATH)/docker-compose.sh > docker-compose.yml
 
 check_w_container_%:
+	$(if $(CALL_W_CONTAINER),,echo "CALL_W_CONTAINER is not set" ; exit 1)
 	$(if $(filter $*,$(CALL_W_CONTAINER)),,\
 	$(error "Error: target '$*' cannot be called wc_ or wdeps_"))
 
