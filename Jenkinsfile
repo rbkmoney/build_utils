@@ -18,14 +18,13 @@ node('gentoo') {
       sh 'make wdeps_smoke_test'
     }
 
-    def testTag = 'jenkins_build_test'
-
     runStage('test build image') {
-      sh "make build_image IMAGE_TAG=${testTag}"
+      sh 'make build_image'
     }
 
+    def testTag = 'jenkins_build_test'
     runStage('test push image') {
-      sh "make push_image IMAGE_TAG=${testTag} PUSH_IMAGE_TAG=${testTag}"
+      sh "make push_image SERVICE_IMAGE_PUSH_TAG=${testTag}"
     }
   }
 }

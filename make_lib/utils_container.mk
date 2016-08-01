@@ -14,6 +14,7 @@ ifndef BUILD_IMAGE_TAG
 $(error BUILD_IMAGE_TAG is not set)
 endif
 
+# Image with build/dev environment
 BUILD_IMAGE := "$(REGISTRY)/$(ORG_NAME)/build:$(BUILD_IMAGE_TAG)"
 
 UTIL_TARGETS := wc_shell wc_% wdeps_% run_w_container_% check_w_container_%
@@ -46,7 +47,7 @@ run_w_compose_%: check_w_container_% gen_compose_file
 
 gen_compose_file: $(call validate_templates_path)
 	SERVICE_NAME=$(SERVICE_NAME) \
-	BUILD_IMAGE_TAG=$(BUILD_IMAGE_TAG) \
+	BUILD_IMAGE=$(BUILD_IMAGE) \
 	$(TEMPLATES_PATH)/docker-compose.sh > docker-compose.yml
 
 check_w_container_%:

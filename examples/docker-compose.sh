@@ -4,7 +4,7 @@ version: '2'
 
 services:
   ${SERVICE_NAME}:
-    image: dr.rbkmoney.com/rbkmoney/build:${BUILD_IMAGE_TAG}
+    image: ${BUILD_IMAGE}
     volumes:
       - .:/code
     working_dir: /code

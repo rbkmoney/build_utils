@@ -6,28 +6,29 @@ endif
 
 include $(UTILS_PATH)/utils_common.mk
 
-ifndef IMAGE_TAG
-$(error IMAGE_TAG is not set)
+ifndef SERVICE_IMAGE_TAG
+$(error SERVICE_IMAGE_TAG is not set)
 endif
 
-IMAGE_NAME = $(REGISTRY)/$(ORG_NAME)/$(SERVICE_NAME)
+# Image for this service
+SERVICE_IMAGE_NAME = $(REGISTRY)/$(ORG_NAME)/$(SERVICE_NAME)
 
 build_image:
 	$(MAKE) -s do_build_image
 
 do_build_image: Dockerfile
-	$(DOCKER) build --force-rm --tag $(IMAGE_NAME):$(IMAGE_TAG) . && \
-	$(DOCKER) images | grep $(IMAGE_TAG)
+	$(DOCKER) build --force-rm --tag $(SERVICE_IMAGE_NAME):$(SERVICE_IMAGE_TAG) . && \
+	$(DOCKER) images | grep $(SERVICE_IMAGE_TAG)
 
 push_image:
 	$(MAKE) -s do_push_image
 
 do_push_image:
-	if [ -n "$(PUSH_IMAGE_TAG)" ]; then \
-	$(DOCKER) tag "$(IMAGE_NAME):$(IMAGE_TAG)" "$(IMAGE_NAME):$(PUSH_IMAGE_TAG)" && \
-	$(DOCKER) push "$(IMAGE_NAME):$(PUSH_IMAGE_TAG)"; \
+	if [ -n "$(SERVICE_IMAGE_PUSH_TAG)" ]; then \
+	$(DOCKER) tag "$(SERVICE_IMAGE_NAME):$(SERVICE_IMAGE_TAG)" "$(SERVICE_IMAGE_NAME):$(SERVICE_IMAGE_PUSH_TAG)" && \
+	$(DOCKER) push "$(SERVICE_IMAGE_NAME):$(SERVICE_IMAGE_PUSH_TAG)"; \
 	else \
-	echo "Error: PUSH_IMAGE_TAG is not set!" && exit 1; \
+	echo "Error: SERVICE_IMAGE_PUSH_TAG is not set!" && exit 1; \
 	fi
 
 Dockerfile: $(call validate_templates_path) $(TEMPLATES_PATH)/Dockerfile.sh
@@ -37,6 +38,6 @@ Dockerfile: $(call validate_templates_path) $(TEMPLATES_PATH)/Dockerfile.sh
 	BUILD_IMAGE_TAG=$(BUILD_IMAGE_TAG) \
 	$(TEMPLATES_PATH)/Dockerfile.sh > Dockerfile; \
 	else \
-	echo "Error: BASE_MAGE_NAME and BASE_IMAGE_TAG are required!" && exit 1; \
+	echo "Error: BASE_IMAGE_NAME and BASE_IMAGE_TAG are required!" && exit 1; \
 	fi
 
