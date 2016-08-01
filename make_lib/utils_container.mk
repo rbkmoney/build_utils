@@ -19,15 +19,34 @@ BUILD_IMAGE := "$(REGISTRY)/$(ORG_NAME)/build:$(BUILD_IMAGE_TAG)"
 
 UTIL_TARGETS := wc_shell wc_% wdeps_% run_w_container_% check_w_container_%
 
+
+## Interface targets
+
 # Run and attach to build container
 wc_shell:
 	$(DOCKER) run -it --rm -v $$PWD:$$PWD --workdir $$PWD $(BUILD_IMAGE) /bin/bash
 
+# Run a target in container
 wc_%:
 	$(MAKE) -s run_w_container_$*
 
+# Run and attach to build container via docker-compose
+wdeps_shell:
+	$(MAKE) -s to_wdeps_shell
+
+# Run a target on container with docker-compose
 wdeps_%:
 	$(MAKE) -s run_w_compose_$*
+
+
+## Utils
+to_wdeps_shell: DOCKER_COMPOSE = $(call which,docker-compose)
+to_wdeps_shell: gen_compose_file
+	{ \
+	$(DOCKER_COMPOSE) up -d ; \
+	$(DOCKER_COMPOSE) exec $(SERVICE_NAME) /bin/bash ; \
+	$(DOCKER_COMPOSE) down ; \
+	}
 
 run_w_container_%: check_w_container_%
 	{ \

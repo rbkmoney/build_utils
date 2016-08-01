@@ -13,15 +13,19 @@ endif
 # Image for this service
 SERVICE_IMAGE_NAME = $(REGISTRY)/$(ORG_NAME)/$(SERVICE_NAME)
 
+
+## Interface targets
 build_image:
 	$(MAKE) -s do_build_image
 
+push_image:
+	$(MAKE) -s do_push_image
+
+
+## Utils
 do_build_image: Dockerfile
 	$(DOCKER) build --force-rm --tag $(SERVICE_IMAGE_NAME):$(SERVICE_IMAGE_TAG) . && \
 	$(DOCKER) images | grep $(SERVICE_IMAGE_TAG)
-
-push_image:
-	$(MAKE) -s do_push_image
 
 do_push_image:
 	if [ -n "$(SERVICE_IMAGE_PUSH_TAG)" ]; then \
