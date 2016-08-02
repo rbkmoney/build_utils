@@ -3,7 +3,9 @@ node('gentoo') {
   checkout scm
 
   stage 'load pipeline'
-  def pipeline = load("jenkins_lib/pipeline.groovy")
+  // env.JENKINS_LIB is required for pipeline.groovy
+  env.JENKINS_LIB = "./jenkins_lib"
+  def pipeline = load("${env.JENKINS_LIB}/pipeline.groovy")
 
   pipeline("build_utils", 'examples/') {
     runStage('smoke test ') {

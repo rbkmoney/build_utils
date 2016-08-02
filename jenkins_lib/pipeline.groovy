@@ -3,8 +3,8 @@ def call(String repoName, String artiFacts = null, Closure body) {
     docker.withRegistry('https://dr.rbkmoney.com/v2/', 'dockerhub-rbkmoneycibot') {
 
       stage 'init pipeline'
-      def runStage = load("jenkins_lib/runStage.groovy")
-      def storeArtifacts = load("jenkins_lib/storeArtifacts.groovy")
+      def runStage = load("${env.JENKINS_LIB}/runStage.groovy")
+      def storeArtifacts = load("${env.JENKINS_LIB}/storeArtifacts.groovy")
       env.REPO_NAME = repoName
       def buildImg = docker.image('rbkmoney/build:latest')
       //sh 'git submodule update --init'
