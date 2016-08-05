@@ -6,14 +6,9 @@ def call(String repoName, String artiFacts = null, Closure body) {
       def runStage = load("${env.JENKINS_LIB}/runStage.groovy")
       def storeArtifacts = load("${env.JENKINS_LIB}/storeArtifacts.groovy")
       env.REPO_NAME = repoName
-      def buildImg = docker.image('rbkmoney/build:latest')
       //sh 'git submodule update --init'
       sh 'git --no-pager log -1 --pretty=format:"%an" > .commit_author'
       env.COMMIT_AUTHOR = readFile('.commit_author').trim()
-
-      runStage('pull build image') {
-        buildImg.pull()
-      }
 
       wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
         body.call()
@@ -36,7 +31,7 @@ def call(String repoName, String artiFacts = null, Closure body) {
     }
 
     runStage('wipe workspace') {
-      sh 'docker run --rm -v $PWD:$PWD --workdir $PWD rbkmoney/build:latest /bin/bash -c "rm -rf * .* 2>/dev/null || echo ignore"'
+      sh 'docker run --rm -v $PWD:$PWD --workdir $PWD dr.rbkmoney.com/rbkmoney/build /bin/bash -c "rm -rf * .* 2>/dev/null || echo ignore"'
     }
   }
 }
