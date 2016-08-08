@@ -1,13 +1,21 @@
-node('gentoo') {
-  stage 'git checkout'
-  checkout scm
+def finalHook = {
+  runStage('store artifacts') {
+    def storeArtifacts = load("${env.JENKINS_LIB}/storeArtifacts.groovy")
+    storeArtifacts('examples/')
+  }
+}
 
-  stage 'load pipeline'
-  // env.JENKINS_LIB is required for pipeline.groovy
-  env.JENKINS_LIB = "./jenkins_lib"
-  def pipeline = load("${env.JENKINS_LIB}/pipeline.groovy")
+build('build_utils', 'gentoo', finalHook) {
+  checkoutRepo()
 
-  pipeline("build_utils", 'examples/') {
+  def pipeDefault
+  runStage('load pipeline') {
+    // env.JENKINS_LIB is required for pipeline.groovy
+    env.JENKINS_LIB = "./jenkins_lib"
+    pipeDefault = load("${env.JENKINS_LIB}/pipeDefault.groovy")
+  }
+
+  pipeDefault() {
     runStage('smoke test ') {
       sh 'make smoke_test'
     }
@@ -30,3 +38,4 @@ node('gentoo') {
     }
   }
 }
+
