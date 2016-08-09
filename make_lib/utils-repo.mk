@@ -3,7 +3,7 @@ $(error UTILS_PATH is not set)
 endif
 include $(UTILS_PATH)/make_lib/utils_common.mk
 
-REPO_INIT := $(UTILS_PATH)/repo-init.sh
+REPO_INIT := $(UTILS_PATH)/sh/repo-init.sh
 IMAGES_SHARED := $(shell echo "${HOME}")/.cache/$(ORGNAME)/images/shared
 GITHUB_PRIVKEY ?=
 GITHUB_PRIVKEY := $(shell echo $(GITHUB_PRIVKEY) | sed -e 's|%|%%|g')
