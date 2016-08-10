@@ -4,7 +4,7 @@ ifndef UTILS_PATH
 $(error UTILS_PATH is not set)
 endif
 
-include $(UTILS_PATH)/utils_common.mk
+include $(UTILS_PATH)/make_lib/utils_common.mk
 
 ifndef SERVICE_IMAGE_TAG
 $(error SERVICE_IMAGE_TAG is not set)
