@@ -14,7 +14,6 @@ if [[ -d "${d_repo}/.git" ]]; then
     git -C "${d_repo}" pull || exit $?
 else
     einfo "Initialising repository ${d_repo}"
-    eindent
     if [[ -d "${d_repo}" ]]; then
 	ebegin "Removing directory ${d_repo}"
 	rmdir "${d_repo}"
@@ -25,6 +24,5 @@ else
     eend $? "Failed to create directory ${d_repo}" || exit $?
     einfo "Clonning salt states repository ${d_repo}"
     git clone --depth 1 "${remote_uri}" "${d_repo}" || exit $?
-    eoutdent
 fi
 

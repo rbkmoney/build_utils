@@ -2,7 +2,7 @@
 
 # For convenience (specific for this repo)
 # BASE_PATH is defined in the top Makefile
-UTILS_PATH := $(BASE_PATH)/make_lib
+UTILS_PATH := $(BASE_PATH)
 TEMPLATES_PATH := $(BASE_PATH)/examples
 
 # Name of the service
@@ -38,6 +38,6 @@ all: smoke_test
 smoke_test:
 	echo OK
 
-include $(UTILS_PATH)/utils_container.mk
-include $(UTILS_PATH)/utils_image.mk
+include $(UTILS_PATH)/make_lib/utils_container.mk
+include $(UTILS_PATH)/make_lib/utils_image.mk
 
