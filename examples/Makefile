@@ -17,8 +17,8 @@ SERVICE_IMAGE_TAG ?= $(shell git rev-parse HEAD)
 SERVICE_IMAGE_PUSH_TAG ?= $(SERVICE_IMAGE_TAG)
 
 # Base image for the service
-BASE_IMAGE_NAME := service_base
-BASE_IMAGE_TAG := 6de9b3b
+BASE_IMAGE_NAME := base
+BASE_IMAGE_TAG := 6de9b3bc9276ec00ec1d40fe1cfbc4b377faa622
 
 
 ## Variables required for utils_container.mk

@@ -8,10 +8,8 @@ Build Utils
 
 ```
 jenkins_lib/
-├── pipeline.groovy        Основной файл для подключения, содержит pipeline() функцию.
-├── runStage.groovy        Обертка над встроенной stage для корректного логирования и репортов в slack.
-├── storeArtifacts.groovy  Сохранение артефактов Jenkins job (см. аргументы pipeline()).
-└── storeCtLog.groovy      Красивое сохранение Erlang CT логов (пока не работает).
+├── pipeDefault.groovy     Простейший pipeline для работы с использованием docker registry.
+└── storeArtifacts.groovy  Сохранение gz сжатых артефактов Jenkins job.
 ```
 
 
@@ -24,7 +22,18 @@ jenkins_lib/
 make_lib/
 ├── utils_common.mk     Подключается в остальные `.mk` файлы. Содержит общие переменные и функции.
 ├── utils_container.mk  Инструментарий для запуска таргетов в контейнере с `docker run` или `docker-compose`.
-└── utils_image.mk      Build и push образов.
+├── utils_image.mk      Работа с образами (build, push).
+└── utils_repo.mk       Клонирование или синхронизация отдельных репозиториев.
+```
+
+
+- `sh/` - useful shell scripts (e.g. used by make_lib)
+
+```
+sh/
+├── functions.sh   Common functions library.
+├── getstage3.sh   Download any latest stage3 and optionaly do something with it.
+└── repo-init.sh   Clone or sync any git repository.
 ```
 
 
