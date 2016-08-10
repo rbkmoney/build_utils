@@ -4,7 +4,7 @@ endif
 include $(UTILS_PATH)/make_lib/utils_common.mk
 
 REPO_INIT := $(UTILS_PATH)/sh/repo-init.sh
-IMAGES_SHARED := $(shell echo "${HOME}")/.cache/$(ORGNAME)/images/shared
+IMAGES_SHARED := $(shell echo "${HOME}")/.cache/$(ORG_NAME)/images/shared
 GITHUB_PRIVKEY ?=
 GITHUB_PRIVKEY := $(shell echo $(GITHUB_PRIVKEY) | sed -e 's|%|%%|g')
 GITHUB_URI_PREFIX := git+ssh://github.com
