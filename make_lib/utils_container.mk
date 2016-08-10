@@ -15,12 +15,20 @@ BUILD_IMAGE := "$(REGISTRY)/$(ORG_NAME)/build:$(BUILD_IMAGE_TAG)"
 
 UTIL_TARGETS := wc_shell wc_% wdeps_% run_w_container_% check_w_container_%
 
+UNAME = $(shell whoami | tr '[:upper:]' '[:lower:]')
+UID = $(shell id -u | tr '[:upper:]' '[:lower:]')
+GNAME = $(shell id -g -n $(UNAME))
+GID = $(shell id -g)
 
+DOCKER_RUN_PREFIX = $(DOCKER) run --rm -v $$PWD:$$PWD -v $$HOME:$$HOME --workdir $$PWD
+DOCKER_RUN_CMD = $(UTILS_PATH)/sh/as_user.sh -uname $(UNAME) -uid $(UID) -uhome $$HOME -gname $(GNAME) -gid $(GID)
+
+.PHONY: gen_compose_file
 ## Interface targets
 
 # Run and attach to build container
 wc_shell:
-	$(DOCKER) run -it --rm -v $$PWD:$$PWD --workdir $$PWD $(BUILD_IMAGE) /bin/bash
+	$(DOCKER_RUN_PREFIX) -it $(BUILD_IMAGE) $(DOCKER_RUN_CMD)
 
 # Run a target in container
 wc_%:
@@ -39,6 +47,7 @@ wdeps_%:
 to_wdeps_shell: DOCKER_COMPOSE = $(call which,docker-compose)
 to_wdeps_shell: gen_compose_file
 	{ \
+	echo "Warning: 'make wc_shell' is the preferred way to run dev environment." ; \
 	$(DOCKER_COMPOSE) up -d ; \
 	$(DOCKER_COMPOSE) exec $(SERVICE_NAME) /bin/bash ; \
 	$(DOCKER_COMPOSE) down ; \
@@ -46,7 +55,7 @@ to_wdeps_shell: gen_compose_file
 
 run_w_container_%: check_w_container_%
 	{ \
-	$(DOCKER) run --rm -v $$PWD:$$PWD --workdir $$PWD $(BUILD_IMAGE) /bin/bash -c 'pwd ; make $*' ; \
+	$(DOCKER_RUN_PREFIX) $(BUILD_IMAGE) $(DOCKER_RUN_CMD) -cmd 'make $*' ; \
 	res=$$? ; exit $$res ; \
 	}
 
@@ -56,6 +65,7 @@ run_w_compose_%: check_w_container_% gen_compose_file
 	$(DOCKER_COMPOSE) up -d ; \
 	$(DOCKER_COMPOSE) exec -T $(SERVICE_NAME) make $* ; \
 	res=$$? ; \
+	$(DOCKER_COMPOSE) kill ; \
 	$(DOCKER_COMPOSE) down ; \
 	exit $$res ; \
 	}
