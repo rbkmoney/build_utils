@@ -16,50 +16,50 @@ function VerifyHashOfStage3() {
 function get_stage3_by_path() {
     local stage3path="${1}"
     stage3="$(basename ${stage3path})"
-    echo "-=- Downloading ${AUTOBUILDS}/${stage3path} and its DIGESTS"
-    wget -c "${AUTOBUILDS}/${stage3path}" "${AUTOBUILDS}/${stage3path}.DIGESTS" || exit $?
-    echo "-ok"
+    ebegin "Downloading ${AUTOBUILDS}/${stage3path} and its DIGESTS"
+    wget -q -c "${AUTOBUILDS}/${stage3path}" "${AUTOBUILDS}/${stage3path}.DIGESTS" || exit $?
+    eend $? "Fail"
     if VerifyHashOfStage3 "${stage3}" "${stage3}.DIGESTS"; then
-	echo "-ok DIGEST verification passed, sha512 hashes match."
+	einfo "DIGEST verification passed, sha512 hashes match."
     else
-	echo "-!! DIGEST verification failed!"
+	eerror "DIGEST verification failed!"
 	exit 1
     fi
 }
 
 function get_latest_stage3() {
     local arch="${1}" suffix="${2}" __stage3var="${3}"
-    echo "-=- Downloading ${AUTOBUILDS}/latest-stage3-${arch}${suffix}.txt"
-    wget "${AUTOBUILDS}/latest-stage3-${arch}${suffix}.txt" -O "latest-stage3-${arch}${suffix}.txt" || exit $?
-    echo '-ok'
+    ebegin "Downloading ${AUTOBUILDS}/latest-stage3-${arch}${suffix}.txt"
+    wget -q "${AUTOBUILDS}/latest-stage3-${arch}${suffix}.txt" -O "latest-stage3-${arch}${suffix}.txt" || exit $?
+    eend $? "Fail"
     stage3path="$(cat latest-stage3-${arch}${suffix}.txt | tail -n 1 | cut -f 1 -d ' ')"
     stage3="$(basename ${stage3path})" || exit $?
-    echo "-I- latest stage3: ${stage3}"
+    einfo "latest stage3: ${stage3}"
     get_stage3_by_path "${stage3path}"
     eval $__stage3var="'$stage3'"
 }
 
 function decompress_stage3() {
     local stage3="${1}" dst="${2}"
-    echo "-=- Decompressing ${stage3} to ${dst}"
+    ebegin "Decompressing ${stage3} to ${dst}"
     bzip2 -d "${stage3}" -c > "${dst}" || exit $?
-    echo "-ok"
+    eend $? "Fail"
 }
 
 function unpack_stage3() {
     local stage3="${1}" dst="${2}"
-    echo "-=- Unpacking ${stage3} to ${dst}"
-    test $UID -gt 0 && echo "-I- This will probaly fail miserably, since you are not root."
+    ebegin "Unpacking ${stage3} to ${dst}"
+    test $UID -gt 0 && einfo "This will probaly fail miserably, since you are not root."
     mkdir -p "${dst}"
     bunzip2 -c "${stage3}" | tar --exclude "./etc/hosts" --exclude "./sys/*" -xf - -C "${dst}" || exit $?
-    echo "-ok"
+    eend $? "Fail"
 }
 
 function remove_stage3() {
     local stage3="${1}"
-    echo "-=- Removing ${stage3}"
+    ebegin "Removing ${stage3}"
     rm -f "${stage3}" || exit $?
-    echo "-ok"
+    eend $? "Fail"
 }
 
 DIST="http://gentoo.bakka.su"
@@ -79,14 +79,14 @@ while getopts :d:u:D:r OPT "${@}"; do
 	    remove_afterwards=1
 	    ;;
 	*)
-	    echo "usage: ${0##*/} [+-d ARG] [+-u ARG] [+-D ARG] [+-r} [--] ARCH [SUFFIX]"
+	    echo "usage: ${0##*/} [+-d ARG] [+-u ARG] [+-D ARG] [+-r} [--] ARCH [SUFFIX]" 1>&2
 	    exit 2
     esac
 done
 shift $(( OPTIND - 1 ))
 OPTIND=1
 if [ -z $1 ]; then
-    echo "Please specify a stage architecture and an optional suffix as the last arguments"
+    echo "Please specify a stage architecture and an optional suffix as the last arguments" 1>&2
     exit 2
 fi
 arch="$1"
@@ -94,8 +94,8 @@ suffix="$2" # Optional, e.g. -hardened+nomultilib
 
 AUTOBUILDS="${DIST}/releases/${arch}/autobuilds/"
 
-echo "-I- DIST: ${DIST}"
-echo "-I- arch: ${arch} suffix: ${suffix}"
+einfo "DIST: ${DIST}"
+einfo "arch: ${arch} suffix: ${suffix}"
 
 stage3=""
 get_latest_stage3 "${arch}" "${suffix}" stage3
