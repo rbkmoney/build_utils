@@ -27,8 +27,7 @@ build('build_utils', 'gentoo', finalHook) {
       sh 'make wdeps_smoke_test'
     }
 
-    withCredentials([[$class: 'FileBinding', credentialsId: 'github-rbkmoney-ci-bot-file', variable: 'GITHUB_PRIVKEY'],
-                     [$class: 'FileBinding', credentialsId: 'bakka-su-rbkmoney-all', variable: 'BAKKA_SU_PRIVKEY']]) {
+    withCredentials([[$class: 'FileBinding', credentialsId: 'github-rbkmoney-ci-bot-file', variable: 'GITHUB_PRIVKEY']]) {
       runStage('test utils_repo') {
         sh 'make wc_init-repos'
       }

@@ -43,5 +43,5 @@ include $(UTILS_PATH)/make_lib/utils_image.mk
 include $(UTILS_PATH)/make_lib/utils_repo.mk
 
 init-repos: IMAGES_SHARED = /tmp/repo_utils
-init-repos: $(IMAGES_SHARED)/overlays/baka-bakka/.git $(IMAGES_SHARED)/overlays/rbkmoney/.git $(IMAGES_SHARED)/salt/rbkmoney/.git $(IMAGES_SHARED)/salt/common/.git
+init-repos: $(IMAGES_SHARED)/overlays/rbkmoney/.git $(IMAGES_SHARED)/salt/rbkmoney/.git $(IMAGES_SHARED)/salt/common/.git
 
