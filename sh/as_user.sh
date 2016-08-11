@@ -43,9 +43,11 @@ useradd $(test -n "$uid" && echo "-u $uid") -g "${groupname}" \
 	$(test -n "$homedir" && echo "-M -d ${homedir}" || echo "-m") \
 	"${username}" || exit $?
 
+export HOME="${homedir:-/home/$username}"
+
 if [ -n "$cmd" ]; then
-    su "${username}" -c "$cmd";
+    su "${username}" -l -m -c "$cmd";
 else
-    su "${username}";
+    su "${username}" -l -m;
 fi
 
