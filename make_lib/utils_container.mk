@@ -28,7 +28,7 @@ UNAME = $(shell whoami | tr '[:upper:]' '[:lower:]')
 UID = $(shell id -u | tr '[:upper:]' '[:lower:]')
 GNAME = $(shell id -g -n $(UNAME))
 GID = $(shell id -g)
-DOCKER_RUN_CMD = $(UTILS_PATH)/sh/as_user.sh -uname $(UNAME) -uid $(UID) -uhome $$HOME -gname $(GNAME) -gid $(GID)
+DOCKER_RUN_CMD = $(UTILS_PATH)/sh/as_user.sh -u $(UID) -g $(GID) -d $$HOME $(UNAME) $(GNAME)
 
 .PHONY: gen_compose_file
 ## Interface targets

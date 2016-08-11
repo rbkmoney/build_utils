@@ -1,78 +1,47 @@
 #!/bin/bash
 
-MANDATORY=(user_name user_id group_name group_id)
-
 function usage(){
-    echo "Usage: $0 -uname <user_name> -uid <user_id> -gname <group_name> -gid <group_id> [-uhome <user_home> -cmd <commmand> -h]"
+    echo "usage: ${0##*/} [+-u uid] [+-g gid] [+-d home] [+-c cmd] [+-h} [--] <username> <groupname>"
 }
 
-while [ -n "$1" ]; do
-    case $1 in
-        -uname)
-            shift
-            user_name=$1
-            shift
-            ;;
-        -uid)
-            shift
-            user_id=$1
-            shift
-            ;;
-        -uhome)
-            shift
-            user_home=$1
-            shift
-            ;;
-        -gname)
-            shift
-            group_name=$1
-            shift
-            ;;
-        -gid)
-            shift
-            group_id=$1
-            shift
-            ;;
-        -cmd)
-            shift
-            cmd=$1
-            shift
-            ;;
-        -h)
-            usage
-            exit 0
-            ;;
-        *)
-            echo "Unknown arg: $1"
-            usage
-            exit 1
-            ;;
+while getopts :u:g:d:c:h OPT; do
+    case $OPT in
+	u|+u)
+	    uid="$OPTARG"
+	    ;;
+	g|+g)
+	    gid="$OPTARG"
+	    ;;
+	d|+d)
+	    homedir="$OPTARG"
+	    ;;
+	c|+c)
+            cmd="$OPTARG"
+	    ;;
+	h|+h)
+	    usage
+	    ;;
+	*)
+	    usage
+	    exit 2
     esac
 done
+shift $(( OPTIND - 1 ))
+OPTIND=1
 
-for id in `seq 4`; do
-    varname=${MANDATORY[id - 1]}
-    if [ -z "${!varname}" ]; then
-        echo "Error: ${varname} missing."
-        exit 2
-    fi
-done
-
-groupadd -g $group_id $group_name
-
-if [ -n "$user_home" ]; then
-    # use HOME from user_home
-    useradd -g $group_name -u $user_id -M -d $user_home $user_name;
-else
-    # create HOME
-    useradd -g $group_name -u $user_id -m $user_name;
+if [ -z "${1}" -o -z "${2}" ]; then
+   usage
+   exit 2
 fi
 
-if [ -n "$cmd" ]; then
-    # run command as new user
-    su $user_name -c "$cmd";
-else
-    # run /bin/bash as new user
-    su $user_name;
-fi
+username="${1}"
+groupname="${2}"
+
+groupadd $(test -n "$gid" && echo "-g $gid") "${groupname}" || exit $?
+
+useradd $(test -n "$uid" && echo "-u $uid") -g "${groupname}" \
+	$(test -n "$homedir" && echo "-M -d ${homedir}" || echo "-m") \
+	"${username}" || exit $?
+
+su "${username}" $(test -n "${cmd}" && echo "-c ${cmd}") || exit $?
 
