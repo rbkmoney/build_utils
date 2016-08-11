@@ -105,7 +105,13 @@ submodules: $(SUBTARGETS)
     * __CMD__
     * __WORKDIR__
 
+    > Не забыть:
+    > ```chmod 755 Dockerfile.sh```
+
 1. Добавить `docker-compose.sh` шаблон в корень своего репозитория, взяв за основу [examples/docker-compose.sh](./examples/docker-compose.sh). Если есть необходимость, добавить в описание сервисы, от которых зависит ваш.
+
+    > Не забыть:
+    > ```chmod 755 docker-compose.sh```
 
 1. Добавить `Jenkinsfile` в корень своего репозитория. Смотри пример [Jenkinsfile](./Jenkinsfile). Готовый стандандартынй [Jenkinsfile](https://github.com/rbkmoney/erlang-service-template/blob/master/erlang-service-files/Jenkinsfile) `erlang` проекта (надо заменить `{{name}}` на _название проекта_).
 

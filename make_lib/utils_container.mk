@@ -28,14 +28,14 @@ UNAME = $(shell whoami | tr '[:upper:]' '[:lower:]')
 UID = $(shell id -u)
 GNAME = $(shell id -g -n $(UNAME) | tr '[:upper:]' '[:lower:]')
 GID = $(shell id -g)
-DOCKER_RUN_CMD = $(UTILS_PATH)/sh/as_user.sh -u $(UID) -g $(GID) -d $$HOME $(UNAME) $(GNAME)
+DOCKER_RUN_CMD = $(UTILS_PATH)/sh/as_user.sh -u $(UID) -g $(GID) -d $$HOME
 
 .PHONY: gen_compose_file
 ## Interface targets
 
 # Run and attach to build container
 wc_shell:
-	$(DOCKER_RUN_PREFIX) $(DOCKER_RUN_OPTS) -it $(BUILD_IMAGE) $(DOCKER_RUN_CMD)
+	$(DOCKER_RUN_PREFIX) $(DOCKER_RUN_OPTS) -it $(BUILD_IMAGE) $(DOCKER_RUN_CMD) $(UNAME) $(GNAME)
 
 # Run a target in container
 wc_%:
@@ -62,7 +62,7 @@ to_wdeps_shell: gen_compose_file
 
 run_w_container_%: check_w_container_%
 	{ \
-	$(DOCKER_RUN_PREFIX) $(DOCKER_RUN_OPTS) $(BUILD_IMAGE) $(DOCKER_RUN_CMD) -cmd 'make $*' ; \
+	$(DOCKER_RUN_PREFIX) $(DOCKER_RUN_OPTS) $(BUILD_IMAGE) $(DOCKER_RUN_CMD) -c 'make $*' $(UNAME) $(GNAME) ; \
 	res=$$? ; exit $$res ; \
 	}
 
