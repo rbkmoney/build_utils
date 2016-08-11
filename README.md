@@ -53,7 +53,7 @@ examples/
 
 1. Добавить git сабмодуль:
     ```
-submodule add -b master git@github.com:rbkmoney/build_utils.git build_utils
+git submodule add -b master git@github.com:rbkmoney/build_utils.git build_utils
 ```
 
 1. Обновить Makefile, выставляя необходимые переменные и подключая библиотеки. Например, для `erlang` проекта:
@@ -109,7 +109,7 @@ submodules: $(SUBTARGETS)
 
 1. Добавить `Jenkinsfile` в корень своего репозитория. Смотри пример [Jenkinsfile](./Jenkinsfile). Готовый стандандартынй [Jenkinsfile](https://github.com/rbkmoney/erlang-service-template/blob/master/erlang-service-files/Jenkinsfile) `erlang` проекта (надо заменить `{{name}}` на _название проекта_).
 
-1. Для удобства поправить добавить в `.gitignore` правила из [.gitignore](./.gitignore).
+1. Для удобства добавить в `.gitignore` правила из [.gitignore](./.gitignore).
 
 
 ### Hint:
