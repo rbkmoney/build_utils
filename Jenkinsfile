@@ -38,7 +38,7 @@ build('build_utils', 'gentoo', finalHook) {
     }
 
     def testTag = 'jenkins_build_test'
-    runStage('test utils_iamge (push image)') {
+    runStage('test utils_image (push image)') {
       sh "make push_image SERVICE_IMAGE_PUSH_TAG=${testTag}"
     }
   }

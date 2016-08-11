@@ -17,10 +17,8 @@ UTIL_TARGETS := wc_shell wc_% wdeps_% run_w_container_% check_w_container_%
 
 DOCKER_RUN_PREFIX = $(DOCKER) run --rm -v $$PWD:$$PWD -v $$HOME:$$HOME:ro --workdir $$PWD
 ifdef GITHUB_PRIVKEY
-PRIVKEY_PATH=$(shell dirname ${GITHUB_PRIVKEY})
-PRIVKEY_FILE=$(shell basename ${GITHUB_PRIVKEY})
 PRIVKEY_CONT_PATH=/tmp/priv_key
-DOCKER_RUN_PREFIX += -v $(PRIVKEY_PATH):$(PRIVKEY_CONT_PATH):ro --env GITHUB_PRIVKEY=$(PRIVKEY_CONT_PATH)/$(PRIVKEY_FILE)
+DOCKER_RUN_PREFIX += -v `dirname $(GITHUB_PRIVKEY)`:$(PRIVKEY_CONT_PATH):ro --env GITHUB_PRIVKEY=$(PRIVKEY_CONT_PATH)/`basename $(GITHUB_PRIVKEY)`
 endif
 
 # Note:
