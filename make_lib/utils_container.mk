@@ -25,8 +25,8 @@ endif
 # Additional options can be passed to docker run via DOCKER_RUN_OPTS var
 
 UNAME = $(shell whoami | tr '[:upper:]' '[:lower:]')
-UID = $(shell id -u | tr '[:upper:]' '[:lower:]')
-GNAME = $(shell id -g -n $(UNAME))
+UID = $(shell id -u)
+GNAME = $(shell id -g -n $(UNAME) | tr '[:upper:]' '[:lower:]')
 GID = $(shell id -g)
 DOCKER_RUN_CMD = $(UTILS_PATH)/sh/as_user.sh -u $(UID) -g $(GID) -d $$HOME $(UNAME) $(GNAME)
 
