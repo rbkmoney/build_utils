@@ -26,7 +26,7 @@ BASE_IMAGE_TAG := 6de9b3bc9276ec00ec1d40fe1cfbc4b377faa622
 # Build image tag to be used
 BUILD_IMAGE_TAG := 530114ab63a7ff0379a2220169a0be61d3f7c64c
 
-CALL_W_CONTAINER := all smoke_test
+CALL_W_CONTAINER := all smoke_test init-repos
 
 
 ## Targets
@@ -40,4 +40,8 @@ smoke_test:
 
 include $(UTILS_PATH)/make_lib/utils_container.mk
 include $(UTILS_PATH)/make_lib/utils_image.mk
+include $(UTILS_PATH)/make_lib/utils_repo.mk
+
+init-repos: IMAGES_SHARED = /tmp/repo_utils
+init-repos: $(IMAGES_SHARED)/overlays/rbkmoney/.git $(IMAGES_SHARED)/salt/rbkmoney/.git $(IMAGES_SHARED)/salt/common/.git
 
