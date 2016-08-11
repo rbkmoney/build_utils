@@ -23,6 +23,9 @@ PRIVKEY_CONT_PATH=/tmp/priv_key
 DOCKER_RUN_PREFIX += -v $(PRIVKEY_PATH):$(PRIVKEY_CONT_PATH):ro --env GITHUB_PRIVKEY=$(PRIVKEY_CONT_PATH)/$(PRIVKEY_FILE)
 endif
 
+# Note:
+# Additional options can be passed to docker run via DOCKER_RUN_OPTS var
+
 UNAME = $(shell whoami | tr '[:upper:]' '[:lower:]')
 UID = $(shell id -u | tr '[:upper:]' '[:lower:]')
 GNAME = $(shell id -g -n $(UNAME))
@@ -34,7 +37,7 @@ DOCKER_RUN_CMD = $(UTILS_PATH)/sh/as_user.sh -uname $(UNAME) -uid $(UID) -uhome 
 
 # Run and attach to build container
 wc_shell:
-	$(DOCKER_RUN_PREFIX) -it $(BUILD_IMAGE) $(DOCKER_RUN_CMD)
+	$(DOCKER_RUN_PREFIX) $(DOCKER_RUN_OPTS) -it $(BUILD_IMAGE) $(DOCKER_RUN_CMD)
 
 # Run a target in container
 wc_%:
@@ -61,7 +64,7 @@ to_wdeps_shell: gen_compose_file
 
 run_w_container_%: check_w_container_%
 	{ \
-	$(DOCKER_RUN_PREFIX) $(BUILD_IMAGE) $(DOCKER_RUN_CMD) -cmd 'make $*' ; \
+	$(DOCKER_RUN_PREFIX) $(DOCKER_RUN_OPTS) $(BUILD_IMAGE) $(DOCKER_RUN_CMD) -cmd 'make $*' ; \
 	res=$$? ; exit $$res ; \
 	}
 
