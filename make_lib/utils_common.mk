@@ -1,5 +1,16 @@
+ifndef UTILS_COMMON_MK
+UTILS_COMMON_MK := defined
+
 ifndef SERVICE_NAME
 $(error SERVICE_NAME is not set)
+endif
+
+escape_percent = $(shell echo $(1) | sed -e 's|%|%%|g')
+git_ssh_cmd = $(shell which ssh) -o StrictHostKeyChecking=no -o User=git $(shell [ -n "$(1)" ] && echo -o IdentityFile="$(1)")
+
+ifdef GITHUB_PRIVKEY
+GIT_SSH_COMMAND = $(call git_ssh_cmd,$(call escape_percent,$(GITHUB_PRIVKEY)))
+export GIT_SSH_COMMAND
 endif
 
 REGISTRY := dr.rbkmoney.com
@@ -19,4 +30,6 @@ validate_templates_path = $(shell \
 	else \
 		echo "Error: TEMPLATES_PATH is not set!" && exit 1; \
 	fi)
+
+endif #UTILS_COMMON_MK
 
