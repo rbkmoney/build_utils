@@ -7,6 +7,7 @@ services:
     image: ${BUILD_IMAGE}
     volumes:
       - .:$PWD
+      - $HOME/.cache:/home/$UNAME/.cache
     working_dir: $PWD
     command: /sbin/init
 #   depends_on:
