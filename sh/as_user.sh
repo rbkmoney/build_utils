@@ -44,6 +44,7 @@ useradd $(test -n "$uid" && echo "-u $uid") -g "${groupname}" \
 	"${username}" || exit $?
 
 export HOME="${homedir:-/home/$username}"
+chown ${username}:${groupname} "$HOME"
 
 if [ -n "$cmd" ]; then
     su "${username}" -l -m -c "$cmd";
