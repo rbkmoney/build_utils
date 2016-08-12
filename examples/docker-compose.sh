@@ -6,8 +6,8 @@ services:
   ${SERVICE_NAME}:
     image: ${BUILD_IMAGE}
     volumes:
-      - .:/code
-    working_dir: /code
+      - .:$PWD
+    working_dir: $PWD
     command: /sbin/init
 #   depends_on:
 #     - some_required_service
