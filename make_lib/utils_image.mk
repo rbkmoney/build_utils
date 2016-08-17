@@ -10,10 +10,6 @@ ifndef SERVICE_IMAGE_TAG
 $(error SERVICE_IMAGE_TAG is not set)
 endif
 
-# Image for this service
-SERVICE_IMAGE_NAME = $(REGISTRY)/$(ORG_NAME)/$(SERVICE_NAME)
-
-
 ## Interface targets
 build_image:
 	$(MAKE) -s do_build_image
