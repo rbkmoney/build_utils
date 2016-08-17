@@ -15,6 +15,8 @@ endif
 
 REGISTRY := dr.rbkmoney.com
 ORG_NAME := rbkmoney
+SERVICE_IMAGE_NAME := $(REGISTRY)/$(ORG_NAME)/$(SERVICE_NAME)
+export SERVICE_NAME
 
 SHELL := /bin/bash
 
