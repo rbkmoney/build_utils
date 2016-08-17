@@ -10,6 +10,8 @@ EXPOSE 8022
 # BRANCH_NAME is available in Jenkins env).
 LABEL com.rbkmoney.$SERVICE_NAME.parent=$BASE_IMAGE_NAME \
       com.rbkmoney.$SERVICE_NAME.parent_tag=$BASE_IMAGE_TAG \
+      com.rbkmoney.$SERVICE_NAME.build_img=build \
+      com.rbkmoney.$SERVICE_NAME.build_img_tag=$BUILD_IMAGE_TAG \
       com.rbkmoney.$SERVICE_NAME.commit_id=$(git rev-parse HEAD) \
       com.rbkmoney.$SERVICE_NAME.commit_num=$(git rev-list --count HEAD) \
       com.rbkmoney.$SERVICE_NAME.branch=$( \
