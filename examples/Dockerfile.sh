@@ -24,3 +24,4 @@ LABEL com.rbkmoney.$SERVICE_NAME.parent=$BASE_IMAGE_NAME \
         fi)
 WORKDIR /opt
 EOF
+

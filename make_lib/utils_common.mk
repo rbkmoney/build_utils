@@ -5,6 +5,8 @@ ifndef SERVICE_NAME
 $(error SERVICE_NAME is not set)
 endif
 
+export UTILS_PATH
+
 escape_percent = $(shell echo $(1) | sed -e 's|%|%%|g')
 git_ssh_cmd = $(shell which ssh) -o StrictHostKeyChecking=no -o User=git $(shell [ -n "$(1)" ] && echo -o IdentityFile="$(1)")
 
