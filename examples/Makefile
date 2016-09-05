@@ -18,13 +18,13 @@ SERVICE_IMAGE_PUSH_TAG ?= $(SERVICE_IMAGE_TAG)
 
 # Base image for the service
 BASE_IMAGE_NAME := base
-BASE_IMAGE_TAG := 6de9b3bc9276ec00ec1d40fe1cfbc4b377faa622
+BASE_IMAGE_TAG := 730ff18e1383e20e0c5f9d2c4a551c10f8f9b510
 
 
 ## Variables required for utils_container.mk
 
 # Build image tag to be used
-BUILD_IMAGE_TAG := 530114ab63a7ff0379a2220169a0be61d3f7c64c
+BUILD_IMAGE_TAG := 753126790c9ecd763840d9fe58507335af02b875
 
 CALL_W_CONTAINER := all smoke_test init-repos
 
