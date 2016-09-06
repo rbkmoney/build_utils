@@ -36,15 +36,21 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
             }
         }
 
-        // Run mvn install and generate docker file
+        // Run mvn and generate docker file
         env.BM_DB_ID = postgresImage.id
         runStage('Execute build container') {
             withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
                 buildContainer.inside('--link $BM_DB_ID:$DB_HOST_NAME') {
-                    sh 'mvn install --batch-mode --settings  $SETTINGS_XML -P ci ' +
-                            '$MVN_ARGS ' +
+                    def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML -P ci ' +
                             '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
-                            '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG '
+                            '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
+                            '-Ddb.url.host.name=$DB_HOST_NAME ' +
+                            ' $MVN_ARGS '
+                    if (env.BRANCH_NAME == 'master') {
+                        sh 'mvn deploy' + mvn_command_arguments
+                    } else {
+                        sh 'mvn package' + mvn_command_arguments
+                    }
                 }
             }
         }
