@@ -17,6 +17,14 @@ build_image:
 push_image:
 	$(MAKE) -s do_push_image
 
+rm_local_image:
+	$(MAKE) -s do_rm_local_image
+
+do_rm_local_image:
+	$(DOCKER) rmi "$(SERVICE_IMAGE_NAME):$(SERVICE_IMAGE_PUSH_TAG)"
+	if [ "$$SERVICE_IMAGE_PUSH_TAG" != "$$SERVICE_IMAGE_TAG" ] && [ -n "$$SERVICE_IMAGE_TAG" ]; then \
+	$(DOCKER) rmi "$(SERVICE_IMAGE_NAME):$(SERVICE_IMAGE_TAG)"; \
+	fi
 
 ## Utils
 do_build_image: Dockerfile
