@@ -28,7 +28,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
         // Start db if necessary.
         if (dbHostName != null) {
             runStage('Run PostgresDB container') {
-                postgresImage = docker.image('postgres:9.6').run(
+                postgresImage = docker.image('dr.rbkmoney.com/rbkmoney/postgres:9.6').run(
                         '-e POSTGRES_PASSWORD=postgres ' +
                                 '-e POSTGRES_USER=postgres ' +
                                 '-e POSTGRES_DB=$DB_NAME '
