@@ -10,8 +10,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     env.DB_NAME = serviceName
     // host url for database. If null - DB will not start
     env.DB_HOST_NAME = dbHostName
-    // Arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
-    env.MVN_ARGS = mvnArgs
+    // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
 
     // Using withRegistry() for auth on docker hub server.
     // Pull it to local images with short name and reopen it with full name, to exclude double naming problem
@@ -28,7 +27,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
         // Start db if necessary.
         if (dbHostName != null) {
             runStage('Run PostgresDB container') {
-                postgresImage = docker.image('postgres:9.6').run(
+                postgresImage = docker.image('dr.rbkmoney.com/rbkmoney/postgres:9.6').run(
                         '-e POSTGRES_PASSWORD=postgres ' +
                                 '-e POSTGRES_USER=postgres ' +
                                 '-e POSTGRES_DB=$DB_NAME '
@@ -45,7 +44,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
                             '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
                             '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
                             '-Ddb.url.host.name=$DB_HOST_NAME ' +
-                            ' $MVN_ARGS '
+                            " ${mvnArgs}"
                     if (env.BRANCH_NAME == 'master') {
                         sh 'mvn deploy' + mvn_command_arguments
                     } else {
