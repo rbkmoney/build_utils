@@ -25,6 +25,8 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     def postgresImage;
     try {
         // Start db if necessary.
+
+        def insideParams = '';
         if (dbHostName != null) {
             runStage('Run PostgresDB container') {
                 postgresImage = docker.image('dr.rbkmoney.com/rbkmoney/postgres:9.6').run(
@@ -32,14 +34,13 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
                                 '-e POSTGRES_USER=postgres ' +
                                 '-e POSTGRES_DB=$DB_NAME '
                 )
+                insideParams = ' --link ' + postgresImage.id + ':$DB_HOST_NAME '
             }
         }
-
         // Run mvn and generate docker file
-        env.BM_DB_ID = postgresImage.id
         runStage('Execute build container') {
             withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
-                buildContainer.inside('--link $BM_DB_ID:$DB_HOST_NAME') {
+                buildContainer.inside(insideParams) {
                     def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML -P ci ' +
                             '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
                             '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
