@@ -1,5 +1,7 @@
 # Building and pushing images
 
+.PHONY: Dockerfile
+
 ifndef UTILS_PATH
 $(error UTILS_PATH is not set)
 endif
@@ -28,7 +30,7 @@ do_rm_local_image:
 
 ## Utils
 do_build_image: Dockerfile
-	$(DOCKER) build --force-rm --tag $(SERVICE_IMAGE_NAME):$(SERVICE_IMAGE_TAG) . && \
+	$(DOCKER) build --force-rm --no-cache --tag $(SERVICE_IMAGE_NAME):$(SERVICE_IMAGE_TAG) . && \
 	$(DOCKER) images | grep $(SERVICE_IMAGE_TAG)
 
 do_push_image:
