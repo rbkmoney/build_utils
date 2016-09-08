@@ -38,7 +38,7 @@ build('build_utils', 'gentoo', finalHook) {
         sh "make push_image SERVICE_IMAGE_PUSH_TAG=${testTag}"
       }
     } finally {
-      runStage('rm local image') {
+      runStage('test utils_image (rm local image)') {
         sh "make rm_local_image SERVICE_IMAGE_PUSH_TAG=${testTag}"
       }
     }
