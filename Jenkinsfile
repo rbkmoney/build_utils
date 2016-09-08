@@ -32,9 +32,16 @@ build('build_utils', 'gentoo', finalHook) {
     runStage('test utils_image (build image)') {
       sh 'make build_image'
     }
-    def testTag = 'jenkins_build_test'
-    runStage('test utils_image (push image)') {
-      sh "make push_image SERVICE_IMAGE_PUSH_TAG=${testTag}"
+    
+    try {
+      def testTag = 'jenkins_build_test'
+      runStage('test utils_image (push image)') {
+        sh "make push_image SERVICE_IMAGE_PUSH_TAG=${testTag}"
+      }
+    } finally {
+      runStage('rm local image') {
+        sh 'make rm_local_image' 
+      }
     }
   }
 }
