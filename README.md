@@ -1,4 +1,4 @@
-Build Utils
+Build Utils [![Build Status](http://ci.rbkmoney.com/buildStatus/icon?job=rbkmoney_private/build_utils/master)](http://ci.rbkmoney.com/job/rbkmoney_private/job/build_utils/job/master/)
 ======
 
 Инструментарий для тестирования, работы с контейнерами и образами как в локальном окружении, так и в _CI_.
