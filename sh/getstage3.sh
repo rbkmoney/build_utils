@@ -65,15 +65,15 @@ function remove_stage3() {
 }
 
 function usage() {
-    echo "usage: ${0##*/} latest   [+-D ARG] ARCH [SUFFIX]"
-    echo "       ${0##*/} download [+-D ARG] [+-d ARG] [+-u ARG] [+-r} [--] LATEST_PATH"
+    echo "usage: ${0##*/} find-latest [+-D ARG] ARCH [SUFFIX]"
+    echo "       ${0##*/} get-path    [+-D ARG] [+-d ARG] [+-u ARG] [+-r} [--] STAGE_PATH"
 }
 
 DIST="http://gentoo.bakka.su"
 OPTIND=2
 
 case "$1" in
-    latest)
+    find-latest)
         while getopts :D: OPT "${@}"; do
             case $OPT in
                 D|+D)
@@ -95,7 +95,7 @@ case "$1" in
         einfo "arch: ${arch} suffix: ${suffix}"
         find_latest_stage3 "${arch}" "${suffix}"
         ;;
-    download)
+    get-path)
         while getopts :d:u:D:r OPT "${@}"; do
             case $OPT in
 	            d|+d)
@@ -117,7 +117,7 @@ case "$1" in
         done
         shift $(( OPTIND - 1 ))
         if [ -z $1 ]; then
-            echo "Please specify a stage path obtained via ${0##*/} latest" 1>&2
+            echo "Please specify a stage path (e.g. obtained via ${0##*/} find-latest)" 1>&2
             exit 2
         fi
         stage3path="$1"
