@@ -5,7 +5,7 @@ source "${UTILS_PATH}/sh/functions.sh"
 function VerifyHashOfStage3() {
     # First param is package tarball, 2nd is the *.DIGEST file
     test_sum=$(awk -v myvar="$1" '$2==myvar {for(i=1; i<=1; i++) { print $1; exit}}' "${2}")
-    calculated_sum=$(sha512sum "${1}" | awk '{print $1}' -)
+    calculated_sum=$(shasum -a 512 "${1}" | awk '{print $1}' -)
     if [[ "$test_sum" == "$calculated_sum" ]]; then
 	return 0
     else
@@ -15,9 +15,9 @@ function VerifyHashOfStage3() {
 
 function get_stage3_by_path() {
     local stage3path="${1}"
-    stage3="$(basename ${stage3path})"
-    ebegin "Downloading ${AUTOBUILDS}/${stage3path} and its DIGESTS"
-    wget -q -c "${AUTOBUILDS}/${stage3path}" "${AUTOBUILDS}/${stage3path}.DIGESTS" || exit $?
+    local stage3="${2}"
+    ebegin "Downloading ${DIST}/${stage3path} and its DIGESTS"
+    wget -q -c "${DIST}/${stage3path}" "${DIST}/${stage3path}.DIGESTS" || exit $?
     eend $? "Fail"
     if VerifyHashOfStage3 "${stage3}" "${stage3}.DIGESTS"; then
 	einfo "DIGEST verification passed, sha512 hashes match."
@@ -27,16 +27,18 @@ function get_stage3_by_path() {
     fi
 }
 
-function get_latest_stage3() {
-    local arch="${1}" suffix="${2}" __stage3var="${3}"
-    ebegin "Downloading ${AUTOBUILDS}/latest-stage3-${arch}${suffix}.txt"
-    wget -q "${AUTOBUILDS}/latest-stage3-${arch}${suffix}.txt" -O "latest-stage3-${arch}${suffix}.txt" || exit $?
+function find_latest_stage3() {
+    local arch="${1}" suffix="${2}"
+    local build_info="latest-stage3-${arch}${suffix}.txt"
+    local autobuilds="${DIST}/releases/${arch}/autobuilds"
+    local stage3path=""
+    ebegin "Downloading ${autobuilds}/${build_info}"
+    wget -q "${autobuilds}/${build_info}" -O "${build_info}" || exit $?
     eend $? "Fail"
-    stage3path="$(cat latest-stage3-${arch}${suffix}.txt | tail -n 1 | cut -f 1 -d ' ')"
-    stage3="$(basename ${stage3path})" || exit $?
-    einfo "latest stage3: ${stage3}"
-    get_stage3_by_path "${stage3path}"
-    eval $__stage3var="'$stage3'"
+    stage3path="releases/${arch}/autobuilds/$(cat ${build_info} | tail -n 1 | cut -f 1 -d ' ')"
+    rm "${build_info}"
+    einfo "latest stage3: $(basename ${stage3path} || exit $?)"
+    echo "${stage3path}"
 }
 
 function decompress_stage3() {
@@ -62,50 +64,81 @@ function remove_stage3() {
     eend $? "Fail"
 }
 
+function usage() {
+    echo "usage: ${0##*/} latest   [+-D ARG] ARCH [SUFFIX]"
+    echo "       ${0##*/} download [+-D ARG] [+-d ARG] [+-u ARG] [+-r} [--] LATEST_PATH"
+}
+
 DIST="http://gentoo.bakka.su"
+OPTIND=2
 
-while getopts :d:u:D:r OPT "${@}"; do
-    case $OPT in
-	d|+d)
-	    decompress_dst="${OPTARG}"
-	    ;;
-	u|+u)
-	    unpack_dst="${OPTARG}"
-	    ;;
-	D|+D)
-	    DIST="${OPTARG}"
-	    ;;
-	r|+r)
-	    remove_afterwards=1
-	    ;;
-	*)
-	    echo "usage: ${0##*/} [+-d ARG] [+-u ARG] [+-D ARG] [+-r} [--] ARCH [SUFFIX]" 1>&2
-	    exit 2
-    esac
-done
-shift $(( OPTIND - 1 ))
-OPTIND=1
-if [ -z $1 ]; then
-    echo "Please specify a stage architecture and an optional suffix as the last arguments" 1>&2
-    exit 2
-fi
-arch="$1"
-suffix="$2" # Optional, e.g. -hardened+nomultilib
+case "$1" in
+    latest)
+        while getopts :D: OPT "${@}"; do
+            case $OPT in
+                D|+D)
+	                DIST="${OPTARG}"
+	                ;;
+	            *)
+                    usage
+	                exit 2
+            esac
+        done
+        shift $(( OPTIND - 1 ))
+        if [ -z $1 ]; then
+            echo "Please specify a stage architecture and an optional suffix as the last arguments" 1>&2
+            exit 2
+        fi
+        arch="$1"
+        suffix="$2" # Optional, e.g. -hardened+nomultilib
+        einfo "DIST: ${DIST}"
+        einfo "arch: ${arch} suffix: ${suffix}"
+        find_latest_stage3 "${arch}" "${suffix}"
+        ;;
+    download)
+        while getopts :d:u:D:r OPT "${@}"; do
+            case $OPT in
+	            d|+d)
+	                decompress_dst="${OPTARG}"
+	                ;;
+	            u|+u)
+	                unpack_dst="${OPTARG}"
+	                ;;
+	            D|+D)
+	                DIST="${OPTARG}"
+	                ;;
+	            r|+r)
+	                remove_afterwards=1
+	                ;;
+	            *)
+                    usage
+	                exit 2
+            esac
+        done
+        shift $(( OPTIND - 1 ))
+        if [ -z $1 ]; then
+            echo "Please specify a stage path obtained via ${0##*/} latest" 1>&2
+            exit 2
+        fi
+        stage3path="$1"
+        stage3="$(basename ${stage3path})" || exit $?
+        einfo "DIST: ${DIST}"
+        einfo "path: ${stage3path}"
+        get_stage3_by_path "${stage3path}" "${stage3}"
 
-AUTOBUILDS="${DIST}/releases/${arch}/autobuilds/"
+        if [[ -n "${unpack_dst}" ]]; then
+            unpack_stage3 "${stage3}" "${unpack_dst}"
+        elif [[ -n "${decompress_dst}" ]]; then
+            decompress_stage3 "${stage3}" "${decompress_dst}"
+        fi
+        if [[ -n "${remove_afterwards}" ]]; then
+            remove_stage3 "${stage3}"
+        else
+            echo "${stage3}"
+        fi
+        ;;
+    *)
+        usage
+        exit 2
+esac
 
-einfo "DIST: ${DIST}"
-einfo "arch: ${arch} suffix: ${suffix}"
-
-stage3=""
-get_latest_stage3 "${arch}" "${suffix}" stage3
-if [[ -n "${unpack_dst}" ]]; then
-    unpack_stage3 "${stage3}" "${unpack_dst}"
-elif [[ -n "${decompress_dst}" ]]; then
-    decompress_stage3 "${stage3}" "${decompress_dst}"
-fi
-if [[ -n "${remove_afterwards}" ]]; then
-    remove_stage3 "${stage3}"
-else
-    echo "${stage3}"
-fi
