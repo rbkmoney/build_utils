@@ -5,7 +5,14 @@ source "${UTILS_PATH}/sh/functions.sh"
 function VerifyHashOfStage3() {
     # First param is package tarball, 2nd is the *.DIGEST file
     test_sum=$(awk -v myvar="$1" '$2==myvar {for(i=1; i<=1; i++) { print $1; exit}}' "${2}")
-    calculated_sum=$(shasum -a 512 "${1}" | awk '{print $1}' -)
+    if which sha512sum > /dev/null 2>&1; then
+	calculated_sum=$(sha512sum "${1}" | awk '{print $1}' -)
+    elif which shasum  > /dev/null 2>&1; then
+	calculated_sum=$(shasum -a 512 "${1}" | awk '{print $1}' -)
+    else
+	eerror "Install sha512sum or shasum (from perl5) for verification"
+	exit 1
+    fi
     if [[ "$test_sum" == "$calculated_sum" ]]; then
 	return 0
     else
