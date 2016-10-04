@@ -58,6 +58,7 @@ to_wdeps_shell: gen_compose_file
 	{ \
 	echo "Warning: 'make wc_shell' is the preferred way to run dev environment." ; \
 	$(DOCKER_COMPOSE) up -d ; \
+	$(if $(DOCKER_COMPOSE_PREEXEC_HOOK),$(DOCKER_COMPOSE_PREEXEC_HOOK);,) \
 	$(DOCKER_COMPOSE) exec $(SERVICE_NAME) $(DOCKER_RUN_CMD) $(UNAME) $(GNAME) ; \
 	$(DOCKER_COMPOSE) down ; \
 	}
@@ -72,6 +73,7 @@ run_w_compose_%: DOCKER_COMPOSE = $(call which,docker-compose)
 run_w_compose_%: check_w_container_% gen_compose_file
 	{ \
 	$(DOCKER_COMPOSE) up -d ; \
+	$(if $(DOCKER_COMPOSE_PREEXEC_HOOK),$(DOCKER_COMPOSE_PREEXEC_HOOK);,) \
 	$(DOCKER_COMPOSE) exec -T $(SERVICE_NAME) $(DOCKER_RUN_CMD) -c 'make $*' $(UNAME) $(GNAME) ; \
 	res=$$? ; \
 	$(DOCKER_COMPOSE) kill ; \
