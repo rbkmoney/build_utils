@@ -69,7 +69,9 @@ run_w_container_%: check_w_container_%
 	res=$$? ; exit $$res ; \
 	}
 
-run_w_compose_%: DOCKER_COMPOSE = $(call which,docker-compose)
+DOCKER_COMPOSE_SERVICE_NAME := "$(SERVICE_NAME)_$(shell date +%s)"
+
+run_w_compose_%: DOCKER_COMPOSE = $(call which,docker-compose) -p $(DOCKER_COMPOSE_SERVICE_NAME)
 run_w_compose_%: check_w_container_% gen_compose_file
 	{ \
 	$(DOCKER_COMPOSE) up -d ; \
