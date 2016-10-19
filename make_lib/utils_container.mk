@@ -62,6 +62,7 @@ to_wdeps_shell: gen_compose_file
 	$(DOCKER_COMPOSE) up -d ; \
 	$(if $(DOCKER_COMPOSE_PREEXEC_HOOK),$(DOCKER_COMPOSE_PREEXEC_HOOK);,) \
 	$(DOCKER_COMPOSE) exec $(SERVICE_NAME) $(DOCKER_RUN_CMD) $(UNAME) $(GNAME) ; \
+	$(DOCKER_COMPOSE) kill ; \
 	$(DOCKER_COMPOSE) down ; \
 	}
 
