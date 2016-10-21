@@ -51,15 +51,18 @@ wdeps_shell:
 wdeps_%:
 	$(MAKE) -s run_w_compose_$*
 
+RAND := $(shell echo $$RANDOM)
+DOCKER_COMPOSE_SERVICE_NAME := "$(SERVICE_NAME)$(RAND)"
 
 ## Utils
-to_wdeps_shell: DOCKER_COMPOSE = $(call which,docker-compose)
+to_wdeps_shell: DOCKER_COMPOSE = $(call which,docker-compose) -p $(DOCKER_COMPOSE_SERVICE_NAME)
 to_wdeps_shell: gen_compose_file
 	{ \
 	echo "Warning: 'make wc_shell' is the preferred way to run dev environment." ; \
 	$(DOCKER_COMPOSE) up -d ; \
 	$(if $(DOCKER_COMPOSE_PREEXEC_HOOK),$(DOCKER_COMPOSE_PREEXEC_HOOK);,) \
 	$(DOCKER_COMPOSE) exec $(SERVICE_NAME) $(DOCKER_RUN_CMD) $(UNAME) $(GNAME) ; \
+	$(DOCKER_COMPOSE) kill ; \
 	$(DOCKER_COMPOSE) down ; \
 	}
 
@@ -69,7 +72,7 @@ run_w_container_%: check_w_container_%
 	res=$$? ; exit $$res ; \
 	}
 
-run_w_compose_%: DOCKER_COMPOSE = $(call which,docker-compose)
+run_w_compose_%: DOCKER_COMPOSE = $(call which,docker-compose) -p $(DOCKER_COMPOSE_SERVICE_NAME)
 run_w_compose_%: check_w_container_% gen_compose_file
 	{ \
 	$(DOCKER_COMPOSE) up -d ; \
