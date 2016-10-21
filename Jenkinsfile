@@ -32,6 +32,12 @@ build('build_utils', 'gentoo', finalHook) {
     runStage('test utils_image (build image)') {
       sh 'make build_image'
     }
+
+    stage('test cache(PUT, GET, DELETE)'){
+        testCache = load("${env.JENKINS_LIB}/cache/testCache.groovy")
+        testCache()
+    }
+
     def testTag = 'jenkins_build_test'
     try {
       runStage('test utils_image (push image)') {
