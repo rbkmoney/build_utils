@@ -20,7 +20,6 @@ build('build_utils', 'gentoo', finalHook) {
         testCache = load("${env.JENKINS_LIB}/cache/test/testCache.groovy")
         testCache()
     }
-
     runStage('smoke test ') {
       sh 'make smoke_test'
     }
@@ -38,7 +37,6 @@ build('build_utils', 'gentoo', finalHook) {
     runStage('test utils_image (build image)') {
       sh 'make build_image'
     }
-
     def testTag = 'jenkins_build_test'
     try {
       runStage('test utils_image (push image)') {
