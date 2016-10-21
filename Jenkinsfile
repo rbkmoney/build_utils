@@ -34,7 +34,7 @@ build('build_utils', 'gentoo', finalHook) {
     }
 
     stage('test cache(PUT, GET, DELETE)'){
-        testCache = load("${env.JENKINS_LIB}/cache/testCache.groovy")
+        testCache = load("${env.JENKINS_LIB}/cache/test/testCache.groovy")
         testCache()
     }
 
