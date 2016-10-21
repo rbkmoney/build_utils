@@ -1,7 +1,7 @@
 def call() {
-    cachePut = load("${env.JENKINS_LIB}/cache/cachePut.groovy")
-    cacheGet = load("${env.JENKINS_LIB}/cache/cacheGet.groovy")
-    cacheDelete = load("${env.JENKINS_LIB}/cache/cacheDelete.groovy")
+    def cachePut = load("${env.JENKINS_LIB}/cache/cachePut.groovy")
+    def cacheGet = load("${env.JENKINS_LIB}/cache/cacheGet.groovy")
+    def cacheDelete = load("${env.JENKINS_LIB}/cache/cacheDelete.groovy")
 
     def testDir = '.testcache'
     try {
