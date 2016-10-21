@@ -24,6 +24,11 @@ build('build_utils', 'gentoo', finalHook) {
     runStage('test utils_container (wdeps)') {
       sh 'make wdeps_smoke_test'
     }
+    def testCache
+    runStage('test cache(PUT, GET, DELETE)'){
+        testCache = load("${env.JENKINS_LIB}/cache/test/testCache.groovy")
+        testCache()
+    }
     runStage('test utils_repo') {
       withGithubPrivkey {
         sh 'make wc_init-repos'
