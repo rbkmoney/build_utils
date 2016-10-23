@@ -15,6 +15,9 @@ def get(String relPathFrom, String relPathTo) {
   def copyToDir   = java.nio.file.Paths.get("$WORKSPACE", relPathTo).getParent().toString()
   def newFilePath = java.nio.file.Paths.get("$WORKSPACE", relPathTo).toString()
 
+  // fail if there is no such cache
+  sh "ls $copyFrom"
+
   if (!(new java.io.File(copyFrom).isDirectory())) {
     sh "mkdir -p $copyToDir"
     sh "cp -r $copyFrom $newFilePath"
