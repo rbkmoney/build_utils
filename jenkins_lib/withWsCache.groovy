@@ -11,7 +11,7 @@ def call(String cachePath, Closure body) {
   body.call()
 
   wsCache.put(cachePath)
-  echo 'Updated $cachePath in cache.'
+  echo "Updated $cachePath in cache."
 }
 
 def checkJenkinsLib() {
