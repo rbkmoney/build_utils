@@ -85,6 +85,9 @@ build('build_utils', 'gentoo', finalHook) {
       withWsCache(cacheFile) {
         sh "echo $cacheVal1 > $cacheFile"
       }
+
+      sh "rm -rf $cacheFile"
+
       def cacheVal2
       withWsCache(cacheFile) {
         cacheVal2 = sh(script: "cat $cacheFile", returnStdout: true).trim()
