@@ -26,7 +26,7 @@ UID = $(shell id -u)
 GNAME = $(shell id -g -n $(UNAME) | tr '[:upper:]' '[:lower:]')
 GID = $(shell id -g)
 DOCKER_RUN_CMD = $(UTILS_PATH)/sh/as_user.sh -u $(UID) -g $(GID)
-DOCKER_RUN_PREFIX += -v $$HOME/.cache:/home/$(UNAME)/.cache:rw -v $$HOME/.ssh:/home/$(UNAME)/.ssh:ro
+DOCKER_RUN_PREFIX += -t -v $$HOME/.cache:/home/$(UNAME)/.cache:rw -v $$HOME/.ssh:/home/$(UNAME)/.ssh:ro
 export UNAME
 
 # Additional options can be passed to 'docker run' via DOCKER_RUN_OPTS
@@ -35,15 +35,17 @@ DOCKER_RUN_PREFIX += $(DOCKER_RUN_OPTS)
 .PHONY: gen_compose_file
 ## Interface targets
 
-# Run and attach to build container
+# Run and attach interactively to build container.
+# Not applicable for use in CI.
 wc_shell:
-	$(DOCKER_RUN_PREFIX) -it $(BUILD_IMAGE) $(DOCKER_RUN_CMD) $(UNAME) $(GNAME)
+	$(DOCKER_RUN_PREFIX) -i $(BUILD_IMAGE) $(DOCKER_RUN_CMD) $(UNAME) $(GNAME)
 
 # Run a target in container
 wc_%:
 	$(MAKE) -s run_w_container_$*
 
-# Run and attach to build container via docker-compose
+# Run and attach interactively to build container via docker-compose.
+# Not applicable for use in CI.
 wdeps_shell:
 	$(MAKE) -s to_wdeps_shell
 
