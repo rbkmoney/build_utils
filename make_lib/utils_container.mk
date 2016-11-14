@@ -35,7 +35,8 @@ DOCKER_RUN_PREFIX += $(DOCKER_RUN_OPTS)
 .PHONY: gen_compose_file
 ## Interface targets
 
-# Run and attach to build container
+# Run and attach interactively to build container.
+# Not applicable for use in CI.
 wc_shell:
 	$(DOCKER_RUN_PREFIX) -i $(BUILD_IMAGE) $(DOCKER_RUN_CMD) $(UNAME) $(GNAME)
 
@@ -43,7 +44,8 @@ wc_shell:
 wc_%:
 	$(MAKE) -s run_w_container_$*
 
-# Run and attach to build container via docker-compose
+# Run and attach interactively to build container via docker-compose.
+# Not applicable for use in CI.
 wdeps_shell:
 	$(MAKE) -s to_wdeps_shell
 
