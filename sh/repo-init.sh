@@ -11,7 +11,7 @@ if [[ "${remote_uri}" == "git+ssh"* ]]; then
 fi
 if [[ -d "${d_repo}/.git" ]]; then
     einfo "Syncing repository ${d_repo}"
-    git -C "${d_repo}" pull || exit $?
+    git -C "${d_repo}" pull -q || exit $?
 else
     einfo "Initialising repository ${d_repo}"
     if [[ -d "${d_repo}" ]]; then
@@ -23,6 +23,6 @@ else
     mkdir -p "${d_repo}"
     eend $? "Failed to create directory ${d_repo}" || exit $?
     einfo "Clonning salt states repository ${d_repo}"
-    git clone --depth 1 "${remote_uri}" "${d_repo}" || exit $?
+    git clone -q --depth 1 "${remote_uri}" "${d_repo}" || exit $?
 fi
 
