@@ -76,7 +76,7 @@ function usage() {
     echo "       ${0##*/} get-path    [+-D ARG] [+-d ARG] [+-u ARG] [+-r} [--] STAGE_PATH"
 }
 
-DIST="http://gentoo.bakka.su"
+DIST="http://gentoo.bakka.su/gentoo-distfiles"
 OPTIND=2
 
 case "$1" in
