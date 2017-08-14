@@ -96,7 +96,7 @@ def push(Map args) {
                        """
                     if (files != null) {
                         unstash name:stashName
-                        sh "tar -xzf ${stashTar}"
+                        sh "tar -xzf ${stashTar} && rm ${stashTar}"
                         sh """ git add ${files} && git commit -m \"${commitMsg}\" || true """
                         sh """ git push origin ${branch}"""
                     }
