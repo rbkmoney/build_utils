@@ -107,9 +107,11 @@ build('build_utils', 'docker-host', finalHook) {
       gitUtils.push(commitMsg: "Jenkins build #${env.BUILD_TAG}",
                     files: dummyFilename, branch: "test-git-push");
     }
-    runStage('test gitUtils.push orphan') {
+    def dummyDir = 'dummy-dir'
+    runStage('test gitUtils.push orphan (and push file + directory)') {
+      sh "mkdir -p ${dummyDir} && cp ${dummyFilename} ${dummyDir}/"
       gitUtils.push(commitMsg: "Jenkins build #${env.BUILD_TAG}",
-                    files: dummyFilename, branch: "test-git-push-orphan", orphan: true);
+                    files: dummyFilename + " ${dummyDir}", branch: "test-git-push-orphan", orphan: true);
     }
 
     def tmpDir = "jenkins-tmp"
