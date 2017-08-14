@@ -1,3 +1,6 @@
+#!groovy
+// -*- mode: groovy -*-
+
 def finalHook = {
   runStage('store artifacts') {
     def storeArtifacts = load("${env.JENKINS_LIB}/storeArtifacts.groovy")
@@ -5,7 +8,7 @@ def finalHook = {
   }
 }
 
-build('build_utils', 'gentoo', finalHook) {
+build('build_utils', 'docker-host', finalHook) {
   checkoutRepo()
 
   def pipeDefault
@@ -15,16 +18,6 @@ build('build_utils', 'gentoo', finalHook) {
   }
 
   pipeDefault() {
-    runStage('smoke test ') {
-      sh 'make smoke_test'
-    }
-    runStage('test utils_container (wc)') {
-      sh 'make wc_smoke_test'
-    }
-    runStage('test utils_container (wdeps)') {
-      sh 'make wdeps_smoke_test'
-    }
-
     def wsCache
     runStage('load workspace cache functions') {
       wsCache = load("${env.JENKINS_LIB}/wsCache.groovy")
@@ -101,11 +94,67 @@ build('build_utils', 'gentoo', finalHook) {
       }
     }
 
+    def gitUtils
+    runStage('load gitUtils') {
+      gitUtils = load("${env.JENKINS_LIB}/gitUtils.groovy")
+    }
+
+    def dummyFilename = 'dummy'
+    runStage('make dummy file') {
+      sh "echo $BUILD_TAG > ${dummyFilename}"
+    }
+    runStage('test gitUtils.push non orphan') {
+      gitUtils.push(commitMsg: "Jenkins build #${env.BUILD_TAG}",
+                    files: dummyFilename, branch: "test-git-push");
+    }
+    runStage('test gitUtils.push orphan') {
+      gitUtils.push(commitMsg: "Jenkins build #${env.BUILD_TAG}",
+                    files: dummyFilename, branch: "test-git-push-orphan", orphan: true);
+    }
+
+    def tmpDir = "jenkins-tmp"
+    runStage('test gitUtils.checkout non orphan') {
+      ws {
+        try {
+          gitUtils.checkout("git@github.com:rbkmoney/build_utils.git", "test-git-push", false, tmpDir)
+          dir(tmpDir) {
+            def dummyContent = sh(returnStdout: true, script: "cat ${dummyFilename}").trim()
+            if (dummyContent != env.BUILD_TAG) {
+              error "Content of checked out file does not match the build number"
+            }
+          }
+        } finally {
+          sh "rm -rf ${tmpDir} || true"
+        }
+      }
+    }
+    runStage('test gitUtils.checkout orphan') {
+      ws {
+        try {
+          gitUtils.checkout("git@github.com:rbkmoney/build_utils.git", "test-git-push", true, tmpDir)
+          sh "ls -al ${tmpDir}"
+        } finally {
+          sh "rm -rf ${tmpDir} || true"
+        }
+      }
+    }
+
     runStage('test utils_repo') {
       withGithubPrivkey {
         sh 'make wc_init-repos'
       }
     }
+
+    runStage('smoke test ') {
+      sh 'make smoke_test'
+    }
+    runStage('test utils_container (wc)') {
+      sh 'make wc_smoke_test'
+    }
+    runStage('test utils_container (wdeps)') {
+      sh 'make wdeps_smoke_test'
+    }
+
     runStage('test utils_image (build image)') {
       sh 'make build_image'
     }
