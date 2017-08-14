@@ -77,19 +77,26 @@ def push(Map args) {
     if (username == null || email == null) {
         error "Error. Invalid value set: { username = ${username}, email = ${email} }"
     }
-    stash name:'putSSH', allowEmpty:true, includes:files.replaceAll(" ", ",")
+
+    def stashTar = 'gitUtils.tar.gz'
+    def stashName = 'gitUtils.push'
+    if (files != null) {
+        sh "tar -czf ${stashTar} ${files}"
+        stash name:stashName, allowEmpty:true, includes:stashTar
+    }
     ws {
         def repoDir = 'gitUtils.push-tmp'
         try {
             checkout(repo, branch, orphan, repoDir)
             withGithubSshCredentials {
                 dir(repoDir) {
-                    unstash name:'putSSH'
                     sh """ git config push.default simple
                            git config user.name \"${username}\"
                            git config user.email \"${email}\"
                        """
                     if (files != null) {
+                        unstash name:stashName
+                        sh "tar -xzf ${stashTar}"
                         sh """ git add ${files} && git commit -m \"${commitMsg}\" || true """
                         sh """ git push origin ${branch}"""
                     }
