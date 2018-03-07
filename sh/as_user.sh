@@ -36,15 +36,32 @@ fi
 
 username="${1}"
 groupname="${2}"
+if [ -z "${homedir}" ]; then
+    homedir="/home/${username}"
+fi
+test -d "${homedir}" && homedir_exists=1 || homedir_exists=0
 
-groupadd $(test -n "$gid" && echo "-g $gid") "${groupname}" || exit $?
+use_gid=0
 
-useradd $(test -n "$uid" && echo "-u $uid") -g "${groupname}" \
-	$(test -n "$homedir" && echo "-M -d ${homedir}" || echo "-m") \
+if getent group "${groupname}"; then
+    echo "Group '${groupname}' exists, using it instead"
+    echo $(getent group "${groupname}")
+elif [ -n "${gid}" ] && getent group "${gid}"; then
+    echo "Group with gid '${gid}' exists, using it instead"
+    echo $(getent group "${gid}")
+    use_gid=1
+else
+    echo "Group ${groupname} does not exist, creating it"
+    groupadd $(test -n "${gid}" && echo "-g ${gid}") "${groupname}" || exit $?
+fi
+
+useradd $(test -n "$uid" && echo "-u $uid") \
+	-g "$(test $use_gid -eq 1 && echo ${gid} || echo ${groupname})" \
+	-d "${homedir}" $(test $homedir_exists -eq 1 && echo "-M" || echo "-m") \
 	"${username}" || exit $?
 
-export HOME="${homedir:-/home/$username}"
-chown ${username}:${groupname} "$HOME"
+export HOME="${homedir:-/home/${username}}"
+chown "${username}:$(if [ $use_gid -eq 1 ]; then echo ${gid}; else echo ${groupname}; fi)" "$HOME"
 
 if [ -n "$cmd" ]; then
     su "${username}" -l -m -c "$cmd";
