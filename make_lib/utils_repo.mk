@@ -16,14 +16,26 @@ $(IMAGES_SHARED)/portage/.git: .git
 	$(if $(BAKKA_SU_PRIVKEY),SSH_PRIVKEY=$(call escape_percent,$(BAKKA_SU_PRIVKEY)),) UTILS_PATH=$(UTILS_PATH) \
 	"$(REPO_INIT)" "$(IMAGES_SHARED)/portage" "$(BAKKA_SU_URI_PREFIX)/gentoo-mirror"
 
+portage: $(IMAGES_SHARED)/portage/.git
+	mkdir -p $@
+	git --git-dir "$<" -C $@ checkout -q -f $(PORTAGE_REF)
+
 # overlays
 $(IMAGES_SHARED)/overlays/rbkmoney/.git: .git
 	$(if $(GITHUB_PRIVKEY),SSH_PRIVKEY=$(call escape_percent,$(GITHUB_PRIVKEY)),) UTILS_PATH=$(UTILS_PATH) \
 	"$(REPO_INIT)" "$(IMAGES_SHARED)/overlays/rbkmoney" "$(GITHUB_URI_PREFIX)/rbkmoney/gentoo-overlay"
 
+overlays/rbkmoney: $(IMAGES_SHARED)/overlays/rbkmoney/.git
+	mkdir -p $@
+	git --git-dir "$<" -C $@ checkout -q -f $(OVERLAYS_RBKMONEY_REF)
+
 $(IMAGES_SHARED)/overlays/baka-bakka/.git: .git
 	$(if $(BAKKA_SU_PRIVKEY),SSH_PRIVKEY=$(call escape_percent,$(BAKKA_SU_PRIVKEY)),) UTILS_PATH=$(UTILS_PATH) \
 	"$(REPO_INIT)" "$(IMAGES_SHARED)/overlays/baka-bakka" "$(BAKKA_SU_URI_PREFIX)/baka-bakka"
+
+overlays/baka-bakka: $(IMAGES_SHARED)/overlays/baka-bakka/.git
+	mkdir -p $@
+	git --git-dir "$<" -C $@ checkout -q -f $(OVERLAYS_BAKKA_REF)
 
 # salt
 $(IMAGES_SHARED)/salt/rbkmoney/.git: .git
