@@ -24,7 +24,7 @@ BASE_IMAGE_TAG := 730ff18e1383e20e0c5f9d2c4a551c10f8f9b510
 ## Variables required for utils_container.mk
 
 # Build image tag to be used
-BUILD_IMAGE_TAG := 753126790c9ecd763840d9fe58507335af02b875
+BUILD_IMAGE_TAG := 9d4d70317dd08abd400798932a231798ee254a87
 
 CALL_W_CONTAINER := all smoke_test init-repos
 
