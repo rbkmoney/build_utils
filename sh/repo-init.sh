@@ -11,6 +11,7 @@ if [[ "${remote_uri}" == "git+ssh"* ]]; then
 fi
 if [[ -d "${d_repo}/.git" ]]; then
     einfo "Syncing repository ${d_repo}"
+    git -C "${d_repo}" checkout -q master || exit $?
     git -C "${d_repo}" pull -q || exit $?
 else
     einfo "Initialising repository ${d_repo}"
@@ -22,7 +23,7 @@ else
     ebegin "Creating directory ${d_repo}"
     mkdir -p "${d_repo}"
     eend $? "Failed to create directory ${d_repo}" || exit $?
-    einfo "Clonning salt states repository ${d_repo}"
-    git clone -q --depth 1 "${remote_uri}" "${d_repo}" || exit $?
+    einfo "Clonning repository ${d_repo}"
+    git clone -q  --shallow-since="$(date -d "2 weeks ago")" "${remote_uri}" "${d_repo}" || exit $?
 fi
 
