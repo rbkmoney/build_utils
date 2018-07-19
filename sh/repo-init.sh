@@ -24,6 +24,6 @@ else
     mkdir -p "${d_repo}"
     eend $? "Failed to create directory ${d_repo}" || exit $?
     einfo "Clonning repository ${d_repo}"
-    git clone -q  --shallow-since="$(date -d "2 weeks ago")" "${remote_uri}" "${d_repo}" || exit $?
+    git clone -q  --shallow-since="$(date "+%Y-%m-%d" -d "2 weeks ago")" "${remote_uri}" "${d_repo}" || exit $?
 fi
 
