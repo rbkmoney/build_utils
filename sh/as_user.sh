@@ -34,6 +34,10 @@ if [ -z "${1}" -o -z "${2}" ]; then
    exit 2
 fi
 
+# User namespace docker fun
+# Required for 'docker run --userns=host' when user remap enabled
+chown 0:0 /bin/su
+
 username="${1}"
 groupname="${2}"
 if [ -z "${homedir}" ]; then
