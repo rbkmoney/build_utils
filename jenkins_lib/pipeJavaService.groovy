@@ -22,20 +22,20 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     }
 
     // Send result build to sonar
-//    runStage('Maven sonar') {
-//        withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
-//            def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML -P ci ' +
-//                    " -Dgit.branch=${env.BRANCH_NAME} " +
-//                    " ${mvnArgs}"
-//            try {
-//                sh env.JAVA_HOME + 'mvn sonar:sonar' + mvn_command_arguments +
-//                        " -Dsonar.host.url=${env.SONAR_ENDPOINT}"
-//            }
-//            catch (Exception e) {
-//                echo "Can't send to sonar ${env.SONAR_ENDPOINT}."
-//            }
-//        }
-//    }
+    runStage('Maven sonar') {
+        withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
+            def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML -P ci ' +
+                    " -Dgit.branch=${env.BRANCH_NAME} " +
+                    " ${mvnArgs}"
+            try {
+                sh env.JAVA_HOME + 'mvn sonar:sonar' + mvn_command_arguments +
+                        " -Dsonar.host.url=${env.SONAR_ENDPOINT}"
+            }
+            catch (Exception e) {
+                echo "Can't send to sonar ${env.SONAR_ENDPOINT}."
+            }
+        }
+    }
 
     def serviceImage;
     def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID';
