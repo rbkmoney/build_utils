@@ -15,9 +15,9 @@ GIT_SSH_COMMAND = $(call git_ssh_cmd,$(call escape_percent,$(GITHUB_PRIVKEY)))
 export GIT_SSH_COMMAND
 endif
 
-REGISTRY := dr.rbkmoney.com
-ORG_NAME := rbkmoney
-SERVICE_IMAGE_NAME := $(REGISTRY)/$(ORG_NAME)/$(SERVICE_NAME)
+REGISTRY ?= dr.rbkmoney.com
+ORG_NAME ?= rbkmoney
+SERVICE_IMAGE_NAME ?= $(REGISTRY)/$(ORG_NAME)/$(SERVICE_NAME)
 export SERVICE_NAME
 
 SHELL := /bin/bash
