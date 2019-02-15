@@ -34,17 +34,43 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
         }
     }
 
-    runStage("Sleep Quality Gate ") {
+    runStage("Sleep 15 second before receive Quality Gate result") {
         sh 'sleep 15'
     }
 
     runStage("Running SonarQube Quality Gate result") {
         timeout(time: 1, unit: 'MINUTES') {
             def qg = waitForQualityGate()
-            echo "waiting results..."
+            echo "waiting SonarQube Quality Gates result with 1 minute timeout..."
             if (qg.status != 'OK') {
                 error "Pipeline aborted due to quality gate failure: ${qg.status}"
             }
+        }
+    }
+
+    def serviceImage
+    def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
+    getCommitId()
+    runStage('Build local service docker image') {
+        serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
+    }
+
+    try {
+        if (env.BRANCH_NAME == 'master') {
+            runStage('Push service docker image to rbkmoney docker registry') {
+                docker.withRegistry('https://dr.rbkmoney.com/v2/', 'dockerhub-rbkmoneycibot') {
+                    serviceImage.push()
+                }
+                // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
+                // Untag the long-name
+                sh "docker rmi dr.rbkmoney.com/${imgShortName}"
+            }
+        }
+    }
+    finally {
+        runStage('Remove local docker image') {
+            // Remove the image to keep Jenkins runner clean.
+            sh "docker rmi ${imgShortName}"
         }
     }
 }
