@@ -41,7 +41,6 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     runStage("Running SonarQube Quality Gate result") {
         timeout(time: 1, unit: 'MINUTES') {
             def qg = waitForQualityGate()
-            echo "waiting SonarQube Quality Gates result with 1 minute timeout..."
             if (qg.status != 'OK') {
                 error "Pipeline aborted due to quality gate failure: ${qg.status}"
             }
