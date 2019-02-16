@@ -22,14 +22,15 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
         buildContainer = docker.image('dr.rbkmoney.com/rbkmoney/build:$BUILD_IMAGE_TAG')
     }
 
-    def postgresImage;
+    def postgresImage
     try {
         // Start db if necessary.
 
-        def insideParams = '';
+        def insideParams = ''
         if (dbHostName != null) {
             runStage('Run PostgresDB container') {
-                postgresImage = docker.image('dr.rbkmoney.com/rbkmoney/postgres:9.6').run(
+                postgresImage = docker.image('dr.rbkmoney.com/rbkmoney/postgres:9.6')
+                        .run(
                         '-e POSTGRES_PASSWORD=postgres ' +
                                 '-e POSTGRES_USER=postgres ' +
                                 '-e POSTGRES_DB=$DB_NAME '
@@ -74,7 +75,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
         if (env.BRANCH_NAME == 'master') {
             runStage('Push Service image') {
                 docker.withRegistry('https://dr.rbkmoney.com/v2/', 'dockerhub-rbkmoneycibot') {
-                    serviceImage.push();
+                    serviceImage.push()
                 }
                 // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
                 // Untag the long-name

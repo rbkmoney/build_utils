@@ -8,7 +8,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     // mvnArgs - arguments for mvn. For example: ' -DjvmArgs="-Xmx256m" '
 
     // Run mvn and generate docker file
-    runStage('Maven package') {
+    runStage('Running Maven build') {
         withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
             def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML -P ci ' +
                     " -Dgit.branch=${env.BRANCH_NAME} " +
@@ -21,16 +21,42 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
         }
     }
 
-    def serviceImage;
-    def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID';
+    runStage('Running SonarQube analysis') {
+        withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
+            // sonar1 - SonarQube server name in Jenkins properties
+            withSonarQubeEnv('sonar1') {
+                sh env.JAVA_HOME + 'mvn sonar:sonar' +
+                        " --batch-mode --settings  $SETTINGS_XML -P ci " +
+                        " -Dgit.branch=${env.BRANCH_NAME} " +
+                        " ${mvnArgs}" +
+                        " -Dsonar.host.url=${env.SONAR_ENDPOINT}"
+            }
+        }
+    }
+
+    runStage("Sleep 15 second before receive Quality Gate result") {
+        sh 'sleep 15'
+    }
+
+    runStage("Running SonarQube Quality Gate result") {
+        timeout(time: 1, unit: 'MINUTES') {
+            def qg = waitForQualityGate()
+            if (qg.status != 'OK') {
+                error "Pipeline aborted due to quality gate failure: ${qg.status}"
+            }
+        }
+    }
+
+    def serviceImage
+    def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
     getCommitId()
-    runStage('Build Service image') {
+    runStage('Build local service docker image') {
         serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
     }
 
     try {
         if (env.BRANCH_NAME == 'master') {
-            runStage('Push Service image') {
+            runStage('Push service docker image to rbkmoney docker registry') {
                 docker.withRegistry('https://dr.rbkmoney.com/v2/', 'dockerhub-rbkmoneycibot') {
                     serviceImage.push()
                 }
@@ -41,7 +67,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
         }
     }
     finally {
-        runStage('Remove local image') {
+        runStage('Remove local docker image') {
             // Remove the image to keep Jenkins runner clean.
             sh "docker rmi ${imgShortName}"
         }
