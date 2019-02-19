@@ -55,7 +55,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     }
 
     try {
-        if (env.BRANCH_NAME == 'master') {
+        if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith('epic')) {
             runStage('Push service docker image to rbkmoney docker registry') {
                 docker.withRegistry('https://dr.rbkmoney.com/v2/', 'dockerhub-rbkmoneycibot') {
                     serviceImage.push()
