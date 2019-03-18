@@ -5,8 +5,9 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     env.SERVICE_NAME = serviceName
     // use java11 or use std JAVA_HOME (java8)
     env.JAVA_HOME = useJava11 ? "JAVA_HOME=/opt/openjdk-bin-11.0.1_p13 " : ""
-    env.REGISTRY = registry
+
     // mvnArgs - arguments for mvn. For example: ' -DjvmArgs="-Xmx256m" '
+    env.REGISTRY = registry
 
     // Run mvn and generate docker file
     runStage('Running Maven build') {
@@ -52,7 +53,9 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
     getCommitId()
     runStage('Build local service docker image') {
-        serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
+        docker.withRegistry("https://" + registry + '/v2/', registryCredentialsId) {
+            serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
+        }
     }
 
     try {

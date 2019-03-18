@@ -3,6 +3,7 @@ def call(String buildImageTag, String mvnArgs = "",
   String registry = "dr.rbkmoney.com", String registryCredentialsId = "dockerhub-rbkmoneycibot")) {
 
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
+    env.REGISTRY = registry
 
     def buildContainer = docker.image("rbkmoney/build:${buildImageTag}")
     runStage('Pull build image') {

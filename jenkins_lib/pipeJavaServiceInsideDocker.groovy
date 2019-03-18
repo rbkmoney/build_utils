@@ -12,6 +12,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     // host url for database. If null - DB will not start
     env.DB_HOST_NAME = dbHostName
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
+    env.REGISTRY = registry
 
     // Using withRegistry() for auth on docker hub server.
     // Pull it to local images with short name and reopen it with full name, to exclude double naming problem
@@ -30,13 +31,15 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
         def insideParams = ''
         if (dbHostName != null) {
             runStage('Run PostgresDB container') {
-                postgresImage = docker.image(registry + '/rbkmoney/postgres:9.6')
-                        .run(
-                            '-e POSTGRES_PASSWORD=postgres ' +
-                            '-e POSTGRES_USER=postgres ' +
-                            '-e POSTGRES_DB=$DB_NAME '
-                )
-                insideParams = ' --link ' + postgresImage.id + ':$DB_HOST_NAME '
+                docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
+                    postgresImage = docker.image(registry + '/rbkmoney/postgres:9.6')
+                            .run(
+                                '-e POSTGRES_PASSWORD=postgres ' +
+                                '-e POSTGRES_USER=postgres ' +
+                                '-e POSTGRES_DB=$DB_NAME '
+                    )
+                    insideParams = ' --link ' + postgresImage.id + ':$DB_HOST_NAME '
+                }
             }
         }
         // Run mvn and generate docker file
@@ -69,7 +72,9 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID';
     getCommitId()
     runStage('Build Service image') {
-        serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
+        docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
+            serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
+        }
     }
 
     try {
