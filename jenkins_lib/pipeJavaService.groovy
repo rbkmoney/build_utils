@@ -1,5 +1,6 @@
 // Default pipeline for Java service
-def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
+def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "", 
+  String registry = "dr.rbkmoney.com", String registryCredentialsId = "dockerhub-rbkmoneycibot") {
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
     // use java11 or use std JAVA_HOME (java8)
@@ -57,12 +58,12 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     try {
         if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith('epic')) {
             runStage('Push service docker image to rbkmoney docker registry') {
-                docker.withRegistry('https://dr.rbkmoney.com/v2/', 'dockerhub-rbkmoneycibot') {
+                docker.withRegistry("https://" + registry + '/v2/', registryCredentialsId) {
                     serviceImage.push()
                 }
                 // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
                 // Untag the long-name
-                sh "docker rmi dr.rbkmoney.com/${imgShortName}"
+                sh "docker rmi " + registry + "/${imgShortName}"
             }
         }
     }
