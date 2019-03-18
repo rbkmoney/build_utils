@@ -6,11 +6,10 @@ def call(String buildImageTag, String mvnArgs = "",
 
     def buildContainer = docker.image("rbkmoney/build:${buildImageTag}")
     runStage('Pull build image') {
-      docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
-          buildContainer.pull()
-      }
-      buildContainer = docker.image(registry + "/rbkmoney/build:${buildImageTag}")
-        
+        docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
+            buildContainer.pull()
+        }
+        buildContainer = docker.image(registry + "/rbkmoney/build:${buildImageTag}")
     }
 
     runStage('Execute build container') {
