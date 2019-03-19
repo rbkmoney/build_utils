@@ -61,7 +61,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     try {
         if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith('epic')) {
             runStage('Push service docker image to rbkmoney docker registry') {
-                docker.withRegistry("https://" + registry + '/v2/', registryCredentialsId) {
+                docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
                     serviceImage.push()
                 }
                 // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
