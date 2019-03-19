@@ -53,7 +53,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
     getCommitId()
     runStage('Build local service docker image') {
-        docker.withRegistry("https://" + registry + '/v2/', registryCredentialsId) {
+        docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
             serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
         }
     }
