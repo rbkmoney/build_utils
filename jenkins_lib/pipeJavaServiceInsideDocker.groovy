@@ -1,5 +1,6 @@
 // Not actual (but maybe useful in the future) pipeline for Java service
-def call(String serviceName, String baseImageTag, String buildImageTag, String dbHostName, String mvnArgs = "") {
+def call(String serviceName, String baseImageTag, String buildImageTag, String dbHostName, String mvnArgs = "", 
+  String registry = "dr.rbkmoney.com", String registryCredentialsId = "dockerhub-rbkmoneycibot") {
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
     // service java image tag
@@ -11,15 +12,16 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     // host url for database. If null - DB will not start
     env.DB_HOST_NAME = dbHostName
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
+    env.REGISTRY = registry
 
     // Using withRegistry() for auth on docker hub server.
     // Pull it to local images with short name and reopen it with full name, to exclude double naming problem
     def buildContainer = docker.image('rbkmoney/build:$BUILD_IMAGE_TAG')
     runStage('Pull build image') {
-        docker.withRegistry('https://dr.rbkmoney.com/v2/', 'dockerhub-rbkmoneycibot') {
+        docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
             buildContainer.pull()
         }
-        buildContainer = docker.image('dr.rbkmoney.com/rbkmoney/build:$BUILD_IMAGE_TAG')
+        buildContainer = docker.image(registry + '/rbkmoney/build:$BUILD_IMAGE_TAG')
     }
 
     def postgresImage
@@ -29,13 +31,15 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
         def insideParams = ''
         if (dbHostName != null) {
             runStage('Run PostgresDB container') {
-                postgresImage = docker.image('dr.rbkmoney.com/rbkmoney/postgres:9.6')
-                        .run(
-                        '-e POSTGRES_PASSWORD=postgres ' +
+                docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
+                    postgresImage = docker.image(registry + '/rbkmoney/postgres:9.6')
+                            .run(
+                                '-e POSTGRES_PASSWORD=postgres ' +
                                 '-e POSTGRES_USER=postgres ' +
                                 '-e POSTGRES_DB=$DB_NAME '
-                )
-                insideParams = ' --link ' + postgresImage.id + ':$DB_HOST_NAME '
+                    )
+                    insideParams = ' --link ' + postgresImage.id + ':$DB_HOST_NAME '
+                }
             }
         }
         // Run mvn and generate docker file
@@ -68,18 +72,20 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID';
     getCommitId()
     runStage('Build Service image') {
-        serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
+        docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
+            serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
+        }
     }
 
     try {
         if (env.BRANCH_NAME == 'master') {
             runStage('Push Service image') {
-                docker.withRegistry('https://dr.rbkmoney.com/v2/', 'dockerhub-rbkmoneycibot') {
+                docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
                     serviceImage.push()
                 }
                 // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
                 // Untag the long-name
-                sh "docker rmi dr.rbkmoney.com/${imgShortName}"
+                sh "docker rmi " + registry + "/${imgShortName}"
             }
         }
     }

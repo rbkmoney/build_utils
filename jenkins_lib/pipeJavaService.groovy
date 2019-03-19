@@ -1,11 +1,13 @@
 // Default pipeline for Java service
-def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
+def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "", 
+  String registry = "dr.rbkmoney.com", String registryCredentialsId = "dockerhub-rbkmoneycibot") {
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
     // use java11 or use std JAVA_HOME (java8)
     env.JAVA_HOME = useJava11 ? "JAVA_HOME=/opt/openjdk-bin-11.0.1_p13 " : ""
 
     // mvnArgs - arguments for mvn. For example: ' -DjvmArgs="-Xmx256m" '
+    env.REGISTRY = registry
 
     // Run mvn and generate docker file
     runStage('Running Maven build') {
@@ -51,18 +53,20 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
     getCommitId()
     runStage('Build local service docker image') {
-        serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
+        docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
+            serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
+        }
     }
 
     try {
         if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith('epic')) {
             runStage('Push service docker image to rbkmoney docker registry') {
-                docker.withRegistry('https://dr.rbkmoney.com/v2/', 'dockerhub-rbkmoneycibot') {
+                docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
                     serviceImage.push()
                 }
                 // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
                 // Untag the long-name
-                sh "docker rmi dr.rbkmoney.com/${imgShortName}"
+                sh "docker rmi " + registry + "/${imgShortName}"
             }
         }
     }

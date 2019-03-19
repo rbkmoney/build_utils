@@ -1,14 +1,16 @@
 //Default pipeline for Java library
-def call(String buildImageTag, String mvnArgs = "") {
+def call(String buildImageTag, String mvnArgs = "", 
+  String registry = "dr.rbkmoney.com", String registryCredentialsId = "dockerhub-rbkmoneycibot")) {
 
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
+    env.REGISTRY = registry
 
     def buildContainer = docker.image("rbkmoney/build:${buildImageTag}")
     runStage('Pull build image') {
-        docker.withRegistry('https://dr.rbkmoney.com/v2/', 'dockerhub-rbkmoneycibot') {
+        docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
             buildContainer.pull()
         }
-        buildContainer = docker.image("dr.rbkmoney.com/rbkmoney/build:${buildImageTag}")
+        buildContainer = docker.image(registry + "/rbkmoney/build:${buildImageTag}")
     }
 
     runStage('Execute build container') {
