@@ -1,6 +1,6 @@
 // Default pipeline for Java service
 def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "", 
-  String registry = "dr.rbkmoney.com", String registryCredentialsId = "dockerhub-rbkmoneycibot") {
+  String registry = "dr2.rbkmoney.com", String registryCredentialsId = "jenkins_harbor") {
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
     // use java11 or use std JAVA_HOME (java8)

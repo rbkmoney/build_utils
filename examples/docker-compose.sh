@@ -14,7 +14,7 @@ services:
 #     - some_required_service
 #
 # some_required_service:
-#   image: dr.rbkmoney.com/rbkmoney/some_service:${SOME_SERVICE_IMAGE_TAG}
+#   image: dr2.rbkmoney.com/rbkmoney/some_service:${SOME_SERVICE_IMAGE_TAG}
 #   command: /opt/some_service/bin/some_service start
 
 networks:

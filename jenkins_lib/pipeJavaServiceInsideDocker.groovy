@@ -1,6 +1,6 @@
 // Not actual (but maybe useful in the future) pipeline for Java service
 def call(String serviceName, String baseImageTag, String buildImageTag, String dbHostName, String mvnArgs = "", 
-  String registry = "dr.rbkmoney.com", String registryCredentialsId = "dockerhub-rbkmoneycibot") {
+  String registry = "dr2.rbkmoney.com", String registryCredentialsId = "jenkins_harbor") {
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
     // service java image tag
