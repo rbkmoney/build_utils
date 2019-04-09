@@ -1,6 +1,6 @@
 //Default pipeline for Java library
 def call(String buildImageTag, String mvnArgs = "", 
-  String registry = "dr2.rbkmoney.com", String registryCredentialsId = "jenkins_harbor")) {
+  String registry = "dr2.rbkmoney.com", String registryCredentialsId = "jenkins_harbor") {
 
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
     env.REGISTRY = registry
