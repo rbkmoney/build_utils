@@ -23,6 +23,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
         }
     }
 
+
     runStage('Running SonarQube analysis') {
         withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
             // sonar1 - SonarQube server name in Jenkins properties
@@ -41,13 +42,13 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
         retry(4) {
             try {
                 timeout(time: 30, unit: 'SECONDS') {
-                    echo "Retrying for the " + retryAttempt + " time"
+                    echo "Trying for the " + retryAttempt + " time"
                     def qg = waitForQualityGate()
                     if (qg.status != 'OK') {
                         error "Pipeline aborted due to quality gate failure: ${qg.status}"
                     }
                 }
-            } catch (FlowInterruptedException ex) {
+            } catch (ex) {
                 // Work around https://issues.jenkins-ci.org/browse/JENKINS-51454
                 retryAttempt++
                 sleep(5)
