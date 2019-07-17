@@ -35,16 +35,13 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
             }
         }
     }
-
-    runStage("Sleep 15 second before receive Quality Gate result") {
-        sh 'sleep 15'
-    }
-
     runStage("Running SonarQube Quality Gate result") {
-        timeout(time: 1, unit: 'MINUTES') {
-            def qg = waitForQualityGate()
-            if (qg.status != 'OK') {
-                error "Pipeline aborted due to quality gate failure: ${qg.status}"
+        retry(3) {
+            timeout(time: 30, unit: 'SECONDS') {
+                def qg = waitForQualityGate()
+                if (qg.status != 'OK') {
+                    error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                }
             }
         }
     }
