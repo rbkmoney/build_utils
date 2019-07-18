@@ -46,10 +46,10 @@ overlays/baka-bakka: $(IMAGES_SHARED)/overlays/baka-bakka/.git
 $(IMAGES_SHARED)/salt/rbkmoney/.git: .git
 	$(if $(GITHUB_PRIVKEY),SSH_PRIVKEY=$(call escape_percent,$(GITHUB_PRIVKEY)),) \
 	UTILS_PATH=$(UTILS_PATH) "$(REPO_INIT)" "$(IMAGES_SHARED)/salt/rbkmoney" \
-	"$(GITHUB_URI_PREFIX)/rbkmoney/salt-main"
+	"$(GITHUB_URI_PREFIX)/rbkmoney/salt-main" "$(REPO_SHALLOW_SINCE)"
 
 $(IMAGES_SHARED)/salt/common/.git: .git
 	$(if $(BAKKA_SU_PRIVKEY),SSH_PRIVKEY=$(call escape_percent,$(BAKKA_SU_PRIVKEY)),) \
 	UTILS_PATH=$(UTILS_PATH) "$(REPO_INIT)" "$(IMAGES_SHARED)/salt/common" \
-	"$(BAKKA_SU_URI_PREFIX)/salt-common"
+	"$(BAKKA_SU_URI_PREFIX)/salt-common" "$(REPO_SHALLOW_SINCE)"
 
