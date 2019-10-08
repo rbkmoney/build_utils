@@ -1,6 +1,9 @@
 //Default pipeline for Java library
-def call(String buildImageTag, String mvnArgs = "", 
+def call(String buildImageTag, Boolean useJava11 = false,  String mvnArgs = "",
   String registry = "dr2.rbkmoney.com", String registryCredentialsId = "jenkins_harbor") {
+
+    // use java11 or use std JAVA_HOME (java8)
+    env.JAVA_HOME = useJava11 ? "JAVA_HOME=/opt/openjdk-bin-11.0.1_p13 " : ""
 
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
     env.REGISTRY = registry
