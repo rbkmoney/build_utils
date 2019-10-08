@@ -2,8 +2,6 @@
 def call(String buildImageTag, Boolean useJava11 = false,  String mvnArgs = "",
   String registry = "dr2.rbkmoney.com", String registryCredentialsId = "jenkins_harbor") {
 
-    // use java11 or use std JAVA_HOME (java8)
-    env.JAVA_HOME = useJava11 ? "JAVA_HOME=/opt/openjdk-bin-11.0.1_p13 " : ""
 
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
     env.REGISTRY = registry
@@ -20,9 +18,9 @@ def call(String buildImageTag, Boolean useJava11 = false,  String mvnArgs = "",
         withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
             buildContainer.inside() {
                 if (env.BRANCH_NAME == 'master') {
-                    sh env.JAVA_HOME + 'mvn deploy --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
+                    sh 'mvn deploy --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
                 } else {
-                    sh env.JAVA_HOME + 'mvn package --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
+                    sh 'mvn package --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
                 }
             }
         }
@@ -35,7 +33,7 @@ def call(String buildImageTag, Boolean useJava11 = false,  String mvnArgs = "",
             withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
                 // sonar1 - SonarQube server name in Jenkins properties
                 withSonarQubeEnv('sonar1') {
-                    sh env.JAVA_HOME + 'mvn sonar:sonar' +
+                    sh 'mvn sonar:sonar' +
                             " --batch-mode --settings  $SETTINGS_XML -P ci " +
                             " -Dgit.branch=${env.BRANCH_NAME} " +
                             " ${mvnArgs}" +
