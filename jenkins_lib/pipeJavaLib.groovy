@@ -20,9 +20,9 @@ def call(String buildImageTag, Boolean useJava11 = false,  String mvnArgs = "",
         withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
             buildContainer.inside() {
                 if (env.BRANCH_NAME == 'master') {
-                    sh 'mvn deploy --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
+                    sh env.JAVA_HOME + 'mvn deploy --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
                 } else {
-                    sh 'mvn package --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
+                    sh env.JAVA_HOME + 'mvn package --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
                 }
             }
         }
