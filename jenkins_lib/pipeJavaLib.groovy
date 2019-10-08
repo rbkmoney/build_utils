@@ -1,5 +1,5 @@
 //Default pipeline for Java library
-def call(String buildImageTag, String mvnArgs = "", 
+def call(String buildImageTag, String mvnArgs = "",
   String registry = "dr2.rbkmoney.com", String registryCredentialsId = "jenkins_harbor") {
 
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
@@ -32,7 +32,7 @@ def call(String buildImageTag, String mvnArgs = "",
             withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
                 // sonar1 - SonarQube server name in Jenkins properties
                 withSonarQubeEnv('sonar1') {
-                    sh env.JAVA_HOME + 'mvn sonar:sonar' +
+                    sh 'mvn sonar:sonar' +
                             " --batch-mode --settings  $SETTINGS_XML -P ci " +
                             " -Dgit.branch=${env.BRANCH_NAME} " +
                             " ${mvnArgs}" +
