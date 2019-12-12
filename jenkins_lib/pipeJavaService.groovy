@@ -9,6 +9,8 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     // mvnArgs - arguments for mvn. For example: ' -DjvmArgs="-Xmx256m" '
     env.REGISTRY = registry
 
+    withWsCache = load("${env.JENKINS_LIB}/withWsCache.groovy")
+
     // Run mvn and generate docker file
     runStage('Running Maven build') {
         withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
@@ -26,15 +28,16 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     //skip SonarQube analysis in master branch
     if (env.BRANCH_NAME != 'master') {
         runStage('Running SonarQube analysis') {
-
-            withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
-                // sonar1 - SonarQube server name in Jenkins properties
-                withSonarQubeEnv('sonar1') {
-                    sh env.JAVA_HOME + 'mvn sonar:sonar' +
-                            " --batch-mode --settings  $SETTINGS_XML -P ci " +
-                            " -Dgit.branch=${env.BRANCH_NAME} " +
-                            " ${mvnArgs}" +
-                            " -Dsonar.host.url=${env.SONAR_ENDPOINT}"
+            withWsCache("/home/jenkins/.sonar/cache") {
+                withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
+                    // sonar1 - SonarQube server name in Jenkins properties
+                    withSonarQubeEnv('sonar1') {
+                        sh env.JAVA_HOME + 'mvn sonar:sonar' +
+                                " --batch-mode --settings  $SETTINGS_XML -P ci " +
+                                " -Dgit.branch=${env.BRANCH_NAME} " +
+                                " ${mvnArgs}" +
+                                " -Dsonar.host.url=${env.SONAR_ENDPOINT}"
+                    }
                 }
             }
         }
