@@ -8,6 +8,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
 
     // mvnArgs - arguments for mvn. For example: ' -DjvmArgs="-Xmx256m" '
     env.REGISTRY = registry
+    env.JENKINS_LIB = "./jenkins_lib"
 
     withWsCache = load("${env.JENKINS_LIB}/withWsCache.groovy")
 
