@@ -73,3 +73,5 @@ else
     su "${username}" -l -m;
 fi
 
+# Replacing git helper
+ su "${username}" -l -m -c "git config --global url."https://".insteadOf git://";
