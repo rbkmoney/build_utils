@@ -21,6 +21,10 @@ PRIVKEY_CONT_PATH=/tmp/github_privkey
 DOCKER_RUN_PREFIX += -v `dirname $(GITHUB_PRIVKEY)`:$(PRIVKEY_CONT_PATH):ro --env GITHUB_PRIVKEY=$(PRIVKEY_CONT_PATH)/`basename $(GITHUB_PRIVKEY)`
 endif
 
+ifdef GITHUB_TOKEN
+DOCKER_RUN_PREFIX +=  --env GITHUB_TOKEN='$(GITHUB_TOKEN)' 
+endif
+
 UNAME = $(shell whoami | tr '[:upper:]' '[:lower:]')
 UID = $(shell id -u)
 GNAME = $(shell id -g -n $(UNAME) | tr '[:upper:]' '[:lower:]')
