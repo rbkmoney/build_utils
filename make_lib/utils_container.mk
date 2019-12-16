@@ -21,6 +21,10 @@ PRIVKEY_CONT_PATH=/tmp/github_privkey
 DOCKER_RUN_PREFIX += -v `dirname $(GITHUB_PRIVKEY)`:$(PRIVKEY_CONT_PATH):ro --env GITHUB_PRIVKEY=$(PRIVKEY_CONT_PATH)/`basename $(GITHUB_PRIVKEY)`
 endif
 
+ifdef GITHUB_TOKEN
+DOCKER_RUN_PREFIX +=  --env GITHUB_TOKEN='$(GITHUB_TOKEN)' 
+endif
+
 UNAME = $(shell whoami | tr '[:upper:]' '[:lower:]')
 UID = $(shell id -u)
 GNAME = $(shell id -g -n $(UNAME) | tr '[:upper:]' '[:lower:]')
@@ -62,7 +66,7 @@ to_wdeps_shell: gen_compose_file
 	{ \
 	echo "Warning: 'make wc_shell' is the preferred way to run dev environment." ; \
 	$(DOCKER_COMPOSE) up -d ; \
-	$(if $(DOCKER_COMPOSE_PREEXEC_HOOK),$(DOCKER_COMPOSE_PREEXEC_HOOK);,) \
+	$(if $(DOCKER_COMPOSE_PREdo _HOOK),$(DOCKER_COMPOSE_PREEXEC_HOOK);,) \
 	$(DOCKER_COMPOSE) exec $(SERVICE_NAME) $(DOCKER_RUN_CMD) $(UNAME) $(GNAME) ; \
 	$(DOCKER_COMPOSE) kill ; \
 	$(DOCKER_COMPOSE) down ; \
