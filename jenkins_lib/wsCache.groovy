@@ -10,10 +10,10 @@ def put(String relPath) {
 }
 
 def get(String relPathFrom, String relPathTo) {
-  def WORKSPACE   = pwd()
+  def curDir   = pwd()
   def copyFrom    = getCachePath(relPathFrom, env.WORKSPACE).toString()
-  def copyToDir   = java.nio.file.Paths.get("$WORKSPACE", relPathTo).getParent().toString()
-  def newFilePath = java.nio.file.Paths.get("$WORKSPACE", relPathTo).toString()
+  def copyToDir   = java.nio.file.Paths.get("$curDir", relPathTo).getParent().toString()
+  def newFilePath = java.nio.file.Paths.get("$curDir", relPathTo).toString()
 
   // fail if there is no such cache
   sh "ls $copyFrom"
