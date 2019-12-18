@@ -28,7 +28,7 @@ build('build_utils', 'docker-host', finalHook) {
       def sourceFile = '$testDir/test.txt'
       def targetFile = '$testDir/test2.txt'
       sh "mkdir -p $testDir"
-      sh 'echo test > $sourceFile'
+      sh "echo test > $sourceFile"
       wsCache.put(sourceFile)
       wsCache.get(sourceFile, targetFile)
       if (!fileExists(targetFile)) {
