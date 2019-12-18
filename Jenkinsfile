@@ -23,10 +23,10 @@ build('build_utils', 'docker-host', finalHook) {
       wsCache = load("${env.JENKINS_LIB}/wsCache.groovy")
     }
 
-    def testDir = '.testcache'
+    def testDir = ".testcache"
     runStage('test cache file') {
-      def sourceFile = '$testDir/test.txt'
-      def targetFile = '$testDir/test2.txt'
+      def sourceFile = "$testDir/test.txt"
+      def targetFile = "$testDir/test2.txt"
       sh "mkdir -p $testDir"
       sh "echo test > $sourceFile"
       wsCache.put(sourceFile)
