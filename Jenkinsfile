@@ -25,23 +25,21 @@ build('build_utils', 'docker-host', finalHook) {
 
     def testDir = '.testcache'
     runStage('test cache file') {
+      def sourceFile = '$testDir/test.txt'
+      def targetFile = '$testDir/test2.txt'
       sh "mkdir -p $testDir"
-      dir("$testDir") {
-        sh 'echo test > test.txt'
-        def sourceFile = 'test.txt'
-        def targetFile = 'test2.txt'
-        wsCache.put(sourceFile)
+      sh 'echo test > $sourceFile'
+      wsCache.put(sourceFile)
+      wsCache.get(sourceFile, targetFile)
+      if (!fileExists(targetFile)) {
+        error("File $sourceFile had not been extracted from cache to file $targetFile")
+      }
+      wsCache.delete(sourceFile)
+      try{
         wsCache.get(sourceFile, targetFile)
-        if (!fileExists(targetFile)) {
-          error("File $sourceFile had not been extracted from cache to file $targetFile")
-        }
-        wsCache.delete(sourceFile)
-        try{
-          wsCache.get(sourceFile, targetFile)
-          error("File $sourceFile had not been deleted from cache.")
-        } catch (Exception e){
-          //we expected exception as file should be deleted from cache
-        }
+        error("File $sourceFile had not been deleted from cache.")
+      } catch (Exception e){
+        //we expected exception as file should be deleted from cache
       }
     }
 
