@@ -11,7 +11,7 @@ def put(String relPath) {
 
 def get(String relPathFrom, String relPathTo) {
   def WORKSPACE   = pwd()
-  def copyFrom    = getCachePath(relPathFrom, WORKSPACE).toString()
+  def copyFrom    = getCachePath(relPathFrom, WORKSPACE).getParent().toString()
   def copyToDir   = java.nio.file.Paths.get("$WORKSPACE", relPathTo).getParent().toString()
   def newFilePath = java.nio.file.Paths.get("$WORKSPACE", relPathTo).toString()
 
