@@ -39,9 +39,8 @@ def delete(String relPath) {
 
 // Internal
 def getCachePath(String relPath) {
-  def cacheRootDir = "$env.HOME/.cache"
-  def workspacePathRelatedToHome = "$env.JOB_NAME"
-  java.nio.file.Paths.get(cacheRootDir, workspacePathRelatedToHome, relPath)
+  def cacheRootDir = "$env.HOME/.cache/$env.JOB_NAME"
+  java.nio.file.Paths.get(cacheRootDir, relPath)
 }
 
 return this
