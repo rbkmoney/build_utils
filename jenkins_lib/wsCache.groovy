@@ -1,7 +1,7 @@
 def put(String relPath) {
-  def WORKSPACE = pwd()
-  def copyToDir = getCachePath(relPath, WORKSPACE).getParent().toString()
-  def copyFrom  = java.nio.file.Paths.get("$WORKSPACE", relPath).toString()
+  def curDir = pwd()
+  def copyToDir = getCachePath(relPath).getParent().toString()
+  def copyFrom  = java.nio.file.Paths.get("$curDir", relPath).toString()
 
   sh "mkdir -p $copyToDir"
   sh " cp -r $copyFrom $copyToDir"
@@ -11,7 +11,7 @@ def put(String relPath) {
 
 def get(String relPathFrom, String relPathTo) {
   def curDir   = pwd()
-  def copyFrom    = getCachePath(relPathFrom, env.WORKSPACE).toString()
+  def copyFrom    = getCachePath(relPathFrom).toString()
   def copyToDir   = java.nio.file.Paths.get("$curDir", relPathTo).getParent().toString()
   def newFilePath = java.nio.file.Paths.get("$curDir", relPathTo).toString()
 
@@ -30,8 +30,7 @@ def get(String relPathFrom, String relPathTo) {
 }
 
 def delete(String relPath) {
-  def WORKSPACE = pwd()
-  def absPath   = getCachePath(relPath, pwd()).toString()
+  def absPath = getCachePath(relPath).toString()
 
   sh "rm -rf $absPath"
 
@@ -39,9 +38,9 @@ def delete(String relPath) {
 }
 
 // Internal
-def getCachePath(String relPath, String WORKSPACE) {
+def getCachePath(String relPath) {
   def cacheRootDir = "$env.HOME/.cache"
-  def workspacePathRelatedToHome = java.nio.file.Paths.get("$env.HOME").relativize(java.nio.file.Paths.get("$WORKSPACE")).toString();
+  def workspacePathRelatedToHome = "$env.JOB_NAME"
   java.nio.file.Paths.get(cacheRootDir, workspacePathRelatedToHome, relPath)
 }
 
