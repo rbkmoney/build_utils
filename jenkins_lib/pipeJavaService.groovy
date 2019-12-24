@@ -4,7 +4,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
     // use java11 or use std JAVA_HOME (java8)
-    env.JAVA_HOME = useJava11 ? "JAVA_HOME=/opt/openjdk-bin-11.0.1_p13 " : ""
+    env.JAVA_HOME = useJava11 ? "JAVA_HOME=`java-config --select-vm openjdk-bin-11 --jdk-home` " : ""
 
     // mvnArgs - arguments for mvn. For example: ' -DjvmArgs="-Xmx256m" '
     env.REGISTRY = registry
