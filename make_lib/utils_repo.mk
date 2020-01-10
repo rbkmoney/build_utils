@@ -11,7 +11,14 @@ GITHUB_URI_PREFIX := git+ssh://github.com
 BAKKA_SU_PRIVKEY ?=
 BAKKA_SU_URI_PREFIX := $(if $(BAKKA_SU_PRIVKEY),git+ssh,git)://git.bakka.su
 
-REPO_SHALLOW_SINCE ?= $(shell date "+%Y-%m-%d" -d "6 months ago")
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+	DATE := gdate
+else
+	DATE := date
+endif
+
+REPO_SHALLOW_SINCE ?= $(shell $(DATE) "+%Y-%m-%d" -d "6 months ago")
 
 # portage
 $(IMAGES_SHARED)/portage/.git: .git

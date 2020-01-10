@@ -6,9 +6,16 @@ fi
 set -u
 source "${UTILS_PATH}/sh/functions.sh"
 
+case $(uname -s) in 
+    Darwin)
+        date_util=gdate ;;
+    *)
+        date_util=date ;;
+esac
+
 d_repo="$1"
 remote_uri="$2"
-shallow_since="${3:-$(date "+%Y-%m-%d" -d "2 weeks ago")}"
+shallow_since="${3:-$("${date_util}" "+%Y-%m-%d" -d "2 weeks ago")}"
 
 if [[ "${remote_uri}" == "git+ssh"* ]]; then
     export GIT_SSH_COMMAND="$(which ssh) -o StrictHostKeyChecking=no -o User=git $([ -n "${SSH_PRIVKEY}" ] && echo -o IdentityFile="${SSH_PRIVKEY}")"
