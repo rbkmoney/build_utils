@@ -6,7 +6,7 @@ fi
 set -u
 source "${UTILS_PATH}/sh/functions.sh"
 
-case $(shell uname -s) of
+case $(shell uname -s) in 
     Darwin)
         date_util = gdate ;;
     *)
