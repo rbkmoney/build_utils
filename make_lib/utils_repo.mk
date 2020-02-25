@@ -18,7 +18,7 @@ else
 	DATE := date
 endif
 
-REPO_SHALLOW_SINCE ?= $(shell $(DATE) "+%Y-%m-%d" -d "6 months ago")
+REPO_SHALLOW_SINCE ?= $(shell $(DATE) "+%Y-%m-%d" -d "12 months ago")
 
 # portage
 $(IMAGES_SHARED)/portage/.git: .git
