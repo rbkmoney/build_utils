@@ -4,7 +4,7 @@ def put(String relPath) {
   def copyFrom  = java.nio.file.Paths.get("$curDir", relPath).toString()
 
   sh "mkdir -p $copyToDir"
-  sh " cp -r $copyFrom $copyToDir"
+  sh " cp -rf $copyFrom $copyToDir"
 
   println("CACHE: PUT '$copyFrom' TO '${copyToDir}/${relPath}'")
 }
@@ -20,10 +20,10 @@ def get(String relPathFrom, String relPathTo) {
 
   if (!(new java.io.File(copyFrom).isDirectory())) {
     sh "mkdir -p $copyToDir"
-    sh "cp -r $copyFrom $newFilePath"
+    sh "cp -rf $copyFrom $newFilePath"
   } else {
     sh "mkdir -p $newFilePath"
-    sh "cp -r $copyFrom/* $newFilePath"
+    sh "cp -rf $copyFrom/* $newFilePath"
   }
 
   println("CACHE: GET '$copyFrom' TO '$newFilePath'")
