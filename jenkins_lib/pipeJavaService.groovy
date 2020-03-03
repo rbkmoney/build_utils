@@ -11,15 +11,17 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
 
     // Run mvn and generate docker file
     runStage('Running Maven build') {
-        withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
-            def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML -P ci ' +
-                    " -Dgit.branch=${env.BRANCH_NAME} " +
-                    " ${mvnArgs}"
-            if (env.BRANCH_NAME == 'master') {
-                sh env.JAVA_HOME + 'mvn deploy' + mvn_command_arguments
-            } else {
-                sh env.JAVA_HOME + 'mvn package' + mvn_command_arguments
-            }
+        docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
+          withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
+              def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML -P ci ' +
+                      " -Dgit.branch=${env.BRANCH_NAME} " +
+                      " ${mvnArgs}"
+              if (env.BRANCH_NAME == 'master') {
+                  sh env.JAVA_HOME + 'mvn deploy' + mvn_command_arguments
+              } else {
+                  sh env.JAVA_HOME + 'mvn package' + mvn_command_arguments
+             }
+          }
         }
     }
 
