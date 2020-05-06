@@ -12,6 +12,12 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     // host url for database. If null - DB will not start
     env.DB_HOST_NAME = dbHostName
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
+    if (env.REPO_PUBLIC == 'true'){
+      mvnArgs += ' -P public '
+    }
+    else {
+      mvnArgs += ' -P private '
+    }
     env.REGISTRY = registry
 
     // Using withRegistry() for auth on docker hub server.
@@ -46,7 +52,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
         runStage('Execute build container') {
             withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
                 buildContainer.inside(insideParams) {
-                    def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML -P ci ' +
+                    def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
                             '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
                             '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
                             '-Ddb.url.host.name=$DB_HOST_NAME ' +

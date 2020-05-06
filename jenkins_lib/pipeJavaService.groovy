@@ -7,13 +7,19 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     env.JAVA_HOME = useJava11 ? "JAVA_HOME=`java-config --select-vm openjdk-bin-11 --jdk-home` " : ""
 
     // mvnArgs - arguments for mvn. For example: ' -DjvmArgs="-Xmx256m" '
+    if (env.REPO_PUBLIC == 'true'){
+      mvnArgs += ' -P public '
+    }
+    else {
+      mvnArgs += ' -P private '
+    }
     env.REGISTRY = registry
 
     // Run mvn and generate docker file
     runStage('Running Maven build') {
         docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
           withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
-              def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML -P ci ' +
+              def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
                       " -Dgit.branch=${env.BRANCH_NAME} " +
                       " ${mvnArgs}"
               if (env.BRANCH_NAME == 'master') {
@@ -33,7 +39,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
                 // sonar1 - SonarQube server name in Jenkins properties
                 withSonarQubeEnv('sonar1') {
                     sh env.JAVA_HOME + 'mvn sonar:sonar' +
-                            " --batch-mode --settings  $SETTINGS_XML -P ci " +
+                            " --batch-mode --settings  $SETTINGS_XML " +
                             " -Dgit.branch=${env.BRANCH_NAME} " +
                             " ${mvnArgs}" +
                             " -Dsonar.host.url=${env.SONAR_ENDPOINT}"
