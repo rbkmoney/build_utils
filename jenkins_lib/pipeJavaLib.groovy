@@ -3,6 +3,13 @@ def call(String buildImageTag, String mvnArgs = "",
   String registry = "dr2.rbkmoney.com", String registryCredentialsId = "jenkins_harbor") {
 
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
+    if (env.REPO_PUBLIC == 'true'){
+      mvnArgs += ' -P public '
+    }
+    else {
+      mvnArgs += ' -P private '
+    }
+
     env.REGISTRY = registry
 
     def buildContainer = docker.image("rbkmoney/build:${buildImageTag}")
@@ -14,12 +21,12 @@ def call(String buildImageTag, String mvnArgs = "",
     }
 
     runStage('Execute build container') {
-        withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
+        withCredentials([[$class: 'FileBinding', credentialsId: 'maven-settings-nexus-github.xml', variable: 'SETTINGS_XML']]) {
             buildContainer.inside() {
                 if (env.BRANCH_NAME == 'master') {
-                    sh 'mvn deploy --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
+                    sh 'mvn deploy --batch-mode --settings $SETTINGS_XML ' + "${mvnArgs}"
                 } else {
-                    sh 'mvn package --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
+                    sh 'mvn package --batch-mode --settings $SETTINGS_XML ' + "${mvnArgs}" 
                 }
             }
         }
