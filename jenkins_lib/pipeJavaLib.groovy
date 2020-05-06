@@ -36,11 +36,11 @@ def call(String buildImageTag, String mvnArgs = "",
     if (env.BRANCH_NAME != 'master') {
         runStage('Running SonarQube analysis') {
 
-            withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
+            withCredentials([[$class: 'FileBinding', credentialsId: 'maven-settings-nexus-github.xml', variable: 'SETTINGS_XML']]) {
                 // sonar1 - SonarQube server name in Jenkins properties
                 withSonarQubeEnv('sonar1') {
                     sh 'mvn sonar:sonar' +
-                            " --batch-mode --settings  $SETTINGS_XML -P ci " +
+                            " --batch-mode --settings  $SETTINGS_XML " +
                             " -Dgit.branch=${env.BRANCH_NAME} " +
                             " ${mvnArgs}" +
                             " -Dsonar.host.url=${env.SONAR_ENDPOINT}"
