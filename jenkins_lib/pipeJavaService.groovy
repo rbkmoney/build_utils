@@ -18,7 +18,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     // Run mvn and generate docker file
     runStage('Running Maven build') {
         docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
-          withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
+          withCredentials([[$class: 'FileBinding', credentialsId: 'maven-settings-nexus-github.xml', variable: 'SETTINGS_XML']]) {
               def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
                       " -Dgit.branch=${env.BRANCH_NAME} " +
                       " ${mvnArgs}"
@@ -35,7 +35,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     if (env.BRANCH_NAME != 'master') {
         runStage('Running SonarQube analysis') {
 
-            withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
+            withCredentials([[$class: 'FileBinding', credentialsId: 'maven-settings-nexus-github.xml', variable: 'SETTINGS_XML']]) {
                 // sonar1 - SonarQube server name in Jenkins properties
                 withSonarQubeEnv('sonar1') {
                     sh env.JAVA_HOME + 'mvn sonar:sonar' +
@@ -92,6 +92,19 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
                 // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
                 // Untag the long-name
                 sh "docker rmi " + registry + "/${imgShortName}"
+            }
+            if (env.REPO_PUBLIC == 'true'){
+                runStage('Push image to docker hub') {
+                    def publicRegistry = 'https://registry.hub.docker.com'
+                    def publicRegistryCredsId = 'dockerhub-rbkmoneycibot'
+                    
+                    docker.withRegistry(publicRegistry, publicRegistryCredsId) {
+                        serviceImage.push()
+                    }
+                    // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
+                    // Untag the long-name
+                    sh "docker rmi " + publicRegistry + "/${imgShortName}"
+                }
             }
         }
     }
