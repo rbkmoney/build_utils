@@ -26,7 +26,7 @@ def call(String buildImageTag, String mvnArgs = "",
                 if (env.BRANCH_NAME == 'master') {
                     sh 'mvn deploy --batch-mode --settings $SETTINGS_XML ' + "${mvnArgs}"
                 } else {
-                    sh 'mvn package --batch-mode --settings $SETTINGS_XML ' + "${mvnArgs}" 
+                    sh 'mvn package --batch-mode --settings $SETTINGS_XML ' + "${mvnArgs}"
                 }
             }
         }
