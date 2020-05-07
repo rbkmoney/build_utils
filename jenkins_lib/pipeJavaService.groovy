@@ -1,6 +1,7 @@
 // Default pipeline for Java service
 def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
-         String registry = "dr2.rbkmoney.com", String registryCredentialsId = "jenkins_harbor") {
+         String privateRegistry = "dr2.rbkmoney.com", String privateRegistryCredsId = "jenkins_harbor",
+         String publicRegistry = "index.docker.io", String publicRegistryCredsId = "dockerhub-rbkmoneycibot") {
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
     // use java11 or use std JAVA_HOME (java8)
@@ -13,11 +14,14 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     else {
       mvnArgs += ' -P private '
     }
-    env.REGISTRY = registry
+    env.REGISTRY = privateRegistry
+
+    def privateRegistryURL = 'https://' + privateRegistry + '/v2/'
+    def publicRegistryURL = 'https://' + publicRegistry + '/v1/'
 
     // Run mvn and generate docker file
     runStage('Running Maven build') {
-        docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
+        docker.withRegistry(privateRegistryURL, privateRegistryCredsId) {
           withCredentials([[$class: 'FileBinding', credentialsId: 'maven-settings-nexus-github.xml', variable: 'SETTINGS_XML']]) {
               def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
                       " -Dgit.branch=${env.BRANCH_NAME} " +
@@ -53,7 +57,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
     getCommitId()
     runStage('Build local service docker image') {
-        docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
+        docker.withRegistry(privateRegistryURL, privateRegistryCredsId) {
             serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
         }
     }
@@ -86,24 +90,19 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     try {
         if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith('epic')) {
             runStage('Push service docker image to rbkmoney docker registry') {
-                docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
+                docker.withRegistry(privateRegistryURL, privateRegistryCredsId) {
                     serviceImage.push()
                 }
                 // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
                 // Untag the long-name
-                sh "docker rmi " + registry + "/${imgShortName}"
+                sh "docker rmi -f " + privateRegistry + "/${imgShortName}"
             }
             if (env.REPO_PUBLIC == 'true'){
-                runStage('Push image to docker hub') {
-                    def publicRegistry = 'https://registry.hub.docker.com'
-                    def publicRegistryCredsId = 'dockerhub-rbkmoneycibot'
-                    
-                    docker.withRegistry(publicRegistry, publicRegistryCredsId) {
+                runStage('Push image to public docker registry') {
+                    docker.withRegistry(publicRegistryURL, publicRegistryCredsId) {
                         serviceImage.push()
                     }
-                    // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
-                    // Untag the long-name
-                    sh "docker rmi " + publicRegistry + "/${imgShortName}"
+                    sh "docker rmi -f " + publicRegistry + "/${imgShortName}"
                 }
             }
         }
@@ -111,7 +110,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     finally {
         runStage('Remove local docker image') {
             // Remove the image to keep Jenkins runner clean.
-            sh "docker rmi ${imgShortName}"
+            sh "docker rmi -f ${imgShortName}"
         }
     }
 }
