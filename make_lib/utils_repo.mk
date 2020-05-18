@@ -22,9 +22,9 @@ REPO_SHALLOW_SINCE ?= $(shell $(DATE) "+%Y-%m-%d" -d "12 months ago")
 
 # portage
 $(IMAGES_SHARED)/portage/.git: .git
-	$(if $(BAKKA_SU_PRIVKEY),SSH_PRIVKEY=$(call escape_percent,$(BAKKA_SU_PRIVKEY)),) \
+	$(if $(GITHUB_PRIVKEY),SSH_PRIVKEY=$(call escape_percent,$(GITHUB_PRIVKEY)),) \
 	UTILS_PATH=$(UTILS_PATH) "$(REPO_INIT)" "$(IMAGES_SHARED)/portage" \
-	"$(BAKKA_SU_URI_PREFIX)/gentoo-mirror" "$(REPO_SHALLOW_SINCE)"
+	"$(GITHUB_URI_PREFIX)/gentoo-mirror/gentoo" "$(REPO_SHALLOW_SINCE)"
 
 portage: $(IMAGES_SHARED)/portage/.git
 	mkdir -p $@
@@ -56,7 +56,6 @@ $(IMAGES_SHARED)/salt/rbkmoney/.git: .git
 	"$(GITHUB_URI_PREFIX)/rbkmoney/salt-main" "$(REPO_SHALLOW_SINCE)"
 
 $(IMAGES_SHARED)/salt/common/.git: .git
-	$(if $(BAKKA_SU_PRIVKEY),SSH_PRIVKEY=$(call escape_percent,$(BAKKA_SU_PRIVKEY)),) \
+	$(if $(GITHUB_PRIVKEY),SSH_PRIVKEY=$(call escape_percent,$(GITHUB_PRIVKEY)),) \
 	UTILS_PATH=$(UTILS_PATH) "$(REPO_INIT)" "$(IMAGES_SHARED)/salt/common" \
-	"$(BAKKA_SU_URI_PREFIX)/salt-common" "$(REPO_SHALLOW_SINCE)"
-
+	"$(GITHUB_URI_PREFIX)/rbkmoney/salt-common" "$(REPO_SHALLOW_SINCE)"
