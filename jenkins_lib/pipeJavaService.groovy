@@ -1,7 +1,5 @@
 // Default pipeline for Java service
-def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
-         String privateRegistry = "dr2.rbkmoney.com", String privateRegistryCredsId = "jenkins_harbor",
-         String publicRegistry = "index.docker.io", String publicRegistryCredsId = "dockerhub-rbkmoneycibot") {
+def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
     // use java11 or use std JAVA_HOME (java8)
@@ -9,37 +7,34 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
 
     // mvnArgs - arguments for mvn. For example: ' -DjvmArgs="-Xmx256m" '
     if (env.REPO_PUBLIC == 'true'){
-      mvnArgs += ' -P public '
+      mvnArgs += ' -P public -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
     }
     else {
       mvnArgs += ' -P private '
     }
-    env.REGISTRY = privateRegistry
-
-    def privateRegistryURL = 'https://' + privateRegistry + '/v2/'
-    def publicRegistryURL = 'https://' + publicRegistry + '/v1/'
 
     // Run mvn and generate docker file
     runStage('Running Maven build') {
-        docker.withRegistry(privateRegistryURL, privateRegistryCredsId) {
-          withCredentials([[$class: 'FileBinding', credentialsId: 'maven-settings-nexus-github.xml', variable: 'SETTINGS_XML']]) {
-              def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
-                      " -Dgit.branch=${env.BRANCH_NAME} " +
-                      " ${mvnArgs}"
-              if (env.BRANCH_NAME == 'master') {
-                  sh env.JAVA_HOME + 'mvn deploy' + mvn_command_arguments
-              } else {
-                  sh env.JAVA_HOME + 'mvn package' + mvn_command_arguments
-             }
-          }
+        withPrivateRegistry() {
+            withMaven() {
+                def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
+                        " -Dgit.branch=${env.BRANCH_NAME} " +
+                        " ${mvnArgs}"
+                if (env.BRANCH_NAME == 'master') {
+                    withGPG() {
+                        sh env.JAVA_HOME + 'mvn deploy' + mvn_command_arguments
+                    } 
+                } else {
+                    sh env.JAVA_HOME + 'mvn package' + mvn_command_arguments
+                }
+            }
         }
     }
 
     //skip SonarQube analysis in master branch
     if (env.BRANCH_NAME != 'master') {
         runStage('Running SonarQube analysis') {
-
-            withCredentials([[$class: 'FileBinding', credentialsId: 'maven-settings-nexus-github.xml', variable: 'SETTINGS_XML']]) {
+            withMaven() {
                 // sonar1 - SonarQube server name in Jenkins properties
                 withSonarQubeEnv('sonar1') {
                     sh env.JAVA_HOME + 'mvn sonar:sonar' +
@@ -57,7 +52,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
     getCommitId()
     runStage('Build local service docker image') {
-        docker.withRegistry(privateRegistryURL, privateRegistryCredsId) {
+        withPrivateRegistry() {
             serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
         }
     }
@@ -90,19 +85,19 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "",
     try {
         if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith('epic')) {
             runStage('Push service docker image to rbkmoney docker registry') {
-                docker.withRegistry(privateRegistryURL, privateRegistryCredsId) {
+                withPrivateRegistry() {
                     serviceImage.push()
+                    // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
+                    // Untag the long-name
+                    sh "docker rmi -f " + env.REGISTRY + "/${imgShortName}"
                 }
-                // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
-                // Untag the long-name
-                sh "docker rmi -f " + privateRegistry + "/${imgShortName}"
             }
             if (env.REPO_PUBLIC == 'true'){
                 runStage('Push image to public docker registry') {
-                    docker.withRegistry(publicRegistryURL, publicRegistryCredsId) {
+                    withPublicRegistry() {
                         serviceImage.push()
+                        sh "docker rmi -f " + env.REGISTRY + "/${imgShortName}"
                     }
-                    sh "docker rmi -f " + publicRegistry + "/${imgShortName}"
                 }
             }
         }

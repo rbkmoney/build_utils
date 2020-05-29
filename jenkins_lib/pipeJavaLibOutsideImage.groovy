@@ -1,39 +1,30 @@
 //Default pipeline for Java library
-def call(String buildImageTag, String mvnArgs = "",
-  String registry = "dr2.rbkmoney.com", String registryCredentialsId = "jenkins_harbor") {
+def call(String buildImageTag, String mvnArgs = "") {
 
-    // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
+    // mvnArgs - arguments for mvn install outside build container. For exmple: ' -DjvmArgs="-Xmx256m" '
     if (env.REPO_PUBLIC == 'true'){
-      mvnArgs += ' -P public '
+      mvnArgs += ' -P public -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
     }
     else {
       mvnArgs += ' -P private '
     }
-    env.REGISTRY = registry
 
-    def buildContainer = docker.image("rbkmoney/build:${buildImageTag}")
-    runStage('Pull build image') {
-        docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
-            buildContainer.pull()
-        }
-        buildContainer = docker.image(registry + "/rbkmoney/build:${buildImageTag}")
-    }
-
-    runStage('Execute build container') {
-        withCredentials([[$class: 'FileBinding', credentialsId: 'maven-settings-nexus-github.xml', variable: 'SETTINGS_XML']]) {
-                if (env.BRANCH_NAME == 'master') {
+    runStage('Build outside container') {
+        withMaven() {
+            if (env.BRANCH_NAME == 'master') {
+                withGPG() {
                     sh 'mvn deploy --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
-                } else {
-                    sh 'mvn package --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
                 }
+            } else {
+                sh 'mvn package --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
+            }
         }
     }
 
     //skip SonarQube analysis in master branch
     if (env.BRANCH_NAME != 'master') {
         runStage('Running SonarQube analysis') {
-
-            withCredentials([[$class: 'FileBinding', credentialsId: 'maven-settings-nexus-github.xml', variable: 'SETTINGS_XML']]) {
+            withMaven() {
                 // sonar1 - SonarQube server name in Jenkins properties
                 withSonarQubeEnv('sonar1') {
                     sh 'mvn sonar:sonar' +
@@ -65,7 +56,6 @@ def call(String buildImageTag, String mvnArgs = "",
             }
         }
     }
-
 
 }
 
