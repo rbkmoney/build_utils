@@ -1,6 +1,5 @@
 //Default pipeline for Java library
-def call(String buildImageTag, String mvnArgs = "",
-  String registry = "dr2.rbkmoney.com", String registryCredentialsId = "jenkins_harbor") {
+def call(String buildImageTag, String mvnArgs = "") {
 
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
     if (env.REPO_PUBLIC == 'true'){
@@ -10,18 +9,16 @@ def call(String buildImageTag, String mvnArgs = "",
       mvnArgs += ' -P private '
     }
 
-    env.REGISTRY = registry
-
     def buildContainer = docker.image("rbkmoney/build:${buildImageTag}")
     runStage('Pull build image') {
-        docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
-            buildContainer.pull()
+        withPrivateRegistry() {
+          buildContainer.pull()
+          buildContainer = docker.image(env.REGISTRY + "/rbkmoney/build:${buildImageTag}")
         }
-        buildContainer = docker.image(registry + "/rbkmoney/build:${buildImageTag}")
     }
 
     runStage('Execute build container') {
-        withCredentials([[$class: 'FileBinding', credentialsId: 'maven-settings-nexus-github.xml', variable: 'SETTINGS_XML']]) {
+        withMaven() {
             buildContainer.inside() {
                 if (env.BRANCH_NAME == 'master') {
                     sh 'mvn deploy --batch-mode --settings $SETTINGS_XML ' + "${mvnArgs}"
@@ -35,8 +32,7 @@ def call(String buildImageTag, String mvnArgs = "",
     //skip SonarQube analysis in master branch
     if (env.BRANCH_NAME != 'master') {
         runStage('Running SonarQube analysis') {
-
-            withCredentials([[$class: 'FileBinding', credentialsId: 'maven-settings-nexus-github.xml', variable: 'SETTINGS_XML']]) {
+            withMaven() {
                 // sonar1 - SonarQube server name in Jenkins properties
                 withSonarQubeEnv('sonar1') {
                     sh 'mvn sonar:sonar' +
