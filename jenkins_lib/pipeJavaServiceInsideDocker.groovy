@@ -65,6 +65,8 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
                 }
             }
         }
+        // Run security tests and quality analysis
+        runJavaSecurityTools(mvnArgs = mvnArgs)
     }
     finally {
         if (postgresImage != null) {
@@ -82,6 +84,9 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
             serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
         }
     }
+
+    // Wait for security and quality analysis results
+    getJavaSecurityResults(mvnArgs = mvnArgs)
 
     try {
         if (env.BRANCH_NAME == 'master') {
