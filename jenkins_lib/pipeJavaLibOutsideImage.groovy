@@ -22,9 +22,9 @@ def call(String buildImageTag, String mvnArgs = "") {
     }
 
     // Run security tests and quality analysis and wait for results
-    runJavaSecurityTools(mvnArgs = mvnArgs)
+    runJavaSecurityTools(mvnArgs)
     // Wait for security and quality analysis results
-    getJavaSecurityResults(mvnArgs = mvnArgs)
+    getJavaSecurityResults(mvnArgs)
 
 }
 

@@ -66,7 +66,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
             }
         }
         // Run security tests and quality analysis
-        runJavaSecurityTools(mvnArgs = mvnArgs)
+        runJavaSecurityTools(mvnArgs)
     }
     finally {
         if (postgresImage != null) {
@@ -86,7 +86,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     }
 
     // Wait for security and quality analysis results
-    getJavaSecurityResults(mvnArgs = mvnArgs)
+    getJavaSecurityResults(mvnArgs)
 
     try {
         if (env.BRANCH_NAME == 'master') {

@@ -3,7 +3,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
     // use java11 or use std JAVA_HOME (java8)
-    env.JAVA_HOME = useJava11 ? "JAVA_HOME=`java-config --select-vm openjdk-bin-11 --jdk-home` " : ""
+    env.JAVA_HOME = useJava11 ? "`java-config --select-vm openjdk-bin-11 --jdk-home`" : "`java-config --jdk-home`"
 
     // mvnArgs - arguments for mvn. For example: ' -DjvmArgs="-Xmx256m" '
     if (env.REPO_PUBLIC == 'true'){
@@ -22,17 +22,17 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
                         " ${mvnArgs}"
                 if (env.BRANCH_NAME == 'master') {
                     withGPG() {
-                        sh env.JAVA_HOME + 'mvn deploy' + mvn_command_arguments
+                        sh 'mvn deploy' + mvn_command_arguments
                     } 
                 } else {
-                    sh env.JAVA_HOME + 'mvn package' + mvn_command_arguments
+                    sh 'mvn package' + mvn_command_arguments
                 }
             }
         }
     }
 
     // Run security tests and quality analysis and wait for results
-    runJavaSecurityTools(mvnArgs = mvnArgs)
+    runJavaSecurityTools(mvnArgs)
 
     //run docker build, while Sonar runs analysis
     def serviceImage
@@ -45,7 +45,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     }
 
     // Wait for security and quality analysis results
-    getJavaSecurityResults(mvnArgs = mvnArgs)
+    getJavaSecurityResults(mvnArgs)
 
     try {
         if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith('epic')) {
