@@ -2,18 +2,18 @@
 def call(String buildImageTag, String mvnArgs = "") {
 
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
-    if (env.REPO_PUBLIC == 'true'){
-      mvnArgs += ' -P public -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
+    if (env.REPO_PUBLIC == 'true') {
+        mvnArgs += ' -P public '
     }
     else {
-      mvnArgs += ' -P private '
+        mvnArgs += ' -P private '
     }
 
     def buildContainer = docker.image("rbkmoney/build:${buildImageTag}")
     runStage('Pull build image') {
         withPrivateRegistry() {
-          buildContainer.pull()
-          buildContainer = docker.image(env.REGISTRY + "/rbkmoney/build:${buildImageTag}")
+            buildContainer.pull()
+            buildContainer = docker.image(env.REGISTRY + "/rbkmoney/build:${buildImageTag}")
         }
     }
 
@@ -21,13 +21,14 @@ def call(String buildImageTag, String mvnArgs = "") {
         withMaven() {
             buildContainer.inside() {
                 if (env.BRANCH_NAME == 'master') {
-                    withGPG(){
-                        sh 'mvn deploy --batch-mode --settings $SETTINGS_XML ' + "${mvnArgs}"
+                    withGPG() {
+                        sh 'mvn deploy --batch-mode --settings $SETTINGS_XML ' + "${mvnArgs}" + 
+                            ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
                     }
                 } else {
                     sh 'mvn package --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
                 }
-            }
+            } 
         }
     }
     

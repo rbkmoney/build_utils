@@ -11,8 +11,8 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     // host url for database. If null - DB will not start
     env.DB_HOST_NAME = dbHostName
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
-    if (env.REPO_PUBLIC == 'true'){
-      mvnArgs += ' -P public -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
+    if (env.REPO_PUBLIC == 'true') {
+      mvnArgs += ' -P public '
     }
     else {
       mvnArgs += ' -P private '
@@ -57,7 +57,8 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
                             " ${mvnArgs}"
                     if (env.BRANCH_NAME == 'master') {
                         withGPG(){
-                            sh 'mvn deploy' + mvn_command_arguments
+                            sh 'mvn deploy' + mvn_command_arguments +
+                                ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
                         }
                     } else {
                         sh 'mvn package' + mvn_command_arguments

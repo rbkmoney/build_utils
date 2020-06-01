@@ -6,8 +6,8 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     env.JAVA_HOME = useJava11 ? "`java-config --select-vm openjdk-bin-11 --jdk-home`" : "`java-config --jdk-home`"
 
     // mvnArgs - arguments for mvn. For example: ' -DjvmArgs="-Xmx256m" '
-    if (env.REPO_PUBLIC == 'true'){
-      mvnArgs += ' -P public -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
+    if (env.REPO_PUBLIC == 'true') {
+      mvnArgs += ' -P public '
     }
     else {
       mvnArgs += ' -P private '
@@ -22,7 +22,8 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
                         " ${mvnArgs}"
                 if (env.BRANCH_NAME == 'master') {
                     withGPG() {
-                        sh 'mvn deploy' + mvn_command_arguments
+                        sh 'mvn deploy' + mvn_command_arguments + 
+                            ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
                     } 
                 } else {
                     sh 'mvn package' + mvn_command_arguments

@@ -2,8 +2,8 @@
 def call(String buildImageTag, String mvnArgs = "") {
 
     // mvnArgs - arguments for mvn install outside build container. For exmple: ' -DjvmArgs="-Xmx256m" '
-    if (env.REPO_PUBLIC == 'true'){
-      mvnArgs += ' -P public -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
+    if (env.REPO_PUBLIC == 'true') {
+      mvnArgs += ' -P public '
     }
     else {
       mvnArgs += ' -P private '
@@ -13,7 +13,8 @@ def call(String buildImageTag, String mvnArgs = "") {
         withMaven() {
             if (env.BRANCH_NAME == 'master') {
                 withGPG() {
-                    sh 'mvn deploy --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
+                    sh 'mvn deploy --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}" +
+                        ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
                 }
             } else {
                 sh 'mvn package --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
