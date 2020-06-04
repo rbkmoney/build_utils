@@ -3,10 +3,10 @@ def call(String buildImageTag, String mvnArgs = "") {
 
     // mvnArgs - arguments for mvn install outside build container. For exmple: ' -DjvmArgs="-Xmx256m" '
     if (env.REPO_PUBLIC == 'true') {
-      mvnArgs += ' -P public '
+      mvnArgs += ' -Ppublic,sign '
     }
     else {
-      mvnArgs += ' -P private '
+      mvnArgs += ' -Pprivate,sign '
     }
 
     runStage('Build outside container') {

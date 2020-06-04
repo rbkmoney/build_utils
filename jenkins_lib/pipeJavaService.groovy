@@ -9,10 +9,10 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
 
     // mvnArgs - arguments for mvn. For example: ' -DjvmArgs="-Xmx256m" '
     if (env.REPO_PUBLIC == 'true') {
-      mvnArgs += ' -P public '
+      mvnArgs += ' -Ppublic,sign '
     }
     else {
-      mvnArgs += ' -P private '
+      mvnArgs += ' -Pprivate,sign '
     }
 
     // Run mvn and generate docker file
