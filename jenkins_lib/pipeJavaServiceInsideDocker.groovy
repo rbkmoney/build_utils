@@ -1,6 +1,5 @@
 // Not actual (but maybe useful in the future) pipeline for Java service
-def call(String serviceName, String baseImageTag, String buildImageTag, String dbHostName, String mvnArgs = "", 
-  String registry = "dr2.rbkmoney.com", String registryCredentialsId = "jenkins_harbor") {
+def call(String serviceName, String baseImageTag, String buildImageTag, String dbHostName, String mvnArgs = "") {
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
     // service java image tag
@@ -12,16 +11,21 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     // host url for database. If null - DB will not start
     env.DB_HOST_NAME = dbHostName
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
-    env.REGISTRY = registry
+    if (env.REPO_PUBLIC == 'true') {
+      mvnArgs += ' -Ppublic,sign '
+    }
+    else {
+      mvnArgs += ' -Pprivate,sign '
+    }
 
     // Using withRegistry() for auth on docker hub server.
     // Pull it to local images with short name and reopen it with full name, to exclude double naming problem
     def buildContainer = docker.image('rbkmoney/build:$BUILD_IMAGE_TAG')
     runStage('Pull build image') {
-        docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
+        withPrivateRegistry() {
             buildContainer.pull()
+            buildContainer = docker.image(env.REGISTRY + '/rbkmoney/build:$BUILD_IMAGE_TAG')
         }
-        buildContainer = docker.image(registry + '/rbkmoney/build:$BUILD_IMAGE_TAG')
     }
 
     def postgresImage
@@ -31,8 +35,8 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
         def insideParams = ''
         if (dbHostName != null) {
             runStage('Run PostgresDB container') {
-                docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
-                    postgresImage = docker.image(registry + '/rbkmoney/postgres:9.6')
+                withPrivateRegistry() {
+                    postgresImage = docker.image(env.REGISTRY + '/rbkmoney/postgres:9.6')
                             .run(
                                 '-e POSTGRES_PASSWORD=postgres ' +
                                 '-e POSTGRES_USER=postgres ' +
@@ -44,21 +48,26 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
         }
         // Run mvn and generate docker file
         runStage('Execute build container') {
-            withCredentials([[$class: 'FileBinding', credentialsId: 'java-maven-settings.xml', variable: 'SETTINGS_XML']]) {
+            withMaven() {
                 buildContainer.inside(insideParams) {
-                    def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML -P ci ' +
+                    def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
                             '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
                             '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
                             '-Ddb.url.host.name=$DB_HOST_NAME ' +
                             " ${mvnArgs}"
                     if (env.BRANCH_NAME == 'master') {
-                        sh 'mvn deploy' + mvn_command_arguments
+                        withGPG(){
+                            sh 'mvn deploy' + mvn_command_arguments +
+                                ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
+                        }
                     } else {
                         sh 'mvn package' + mvn_command_arguments
                     }
                 }
             }
         }
+        // Run security tests and quality analysis
+        runJavaSecurityTools(mvnArgs)
     }
     finally {
         if (postgresImage != null) {
@@ -72,27 +81,38 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID';
     getCommitId()
     runStage('Build Service image') {
-        docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
+        withPrivateRegistry() {
             serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
         }
     }
 
+    // Wait for security and quality analysis results
+    getJavaSecurityResults(mvnArgs)
+
     try {
         if (env.BRANCH_NAME == 'master') {
-            runStage('Push Service image') {
-                docker.withRegistry('https://' + registry + '/v2/', registryCredentialsId) {
+            runStage('Push Service image to private registry') {
+                withPrivateRegistry() {
                     serviceImage.push()
+                    // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
+                    // Untag the long-name
+                    sh "docker rmi -f " + env.REGISTRY + "/${imgShortName}"
                 }
-                // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
-                // Untag the long-name
-                sh "docker rmi " + registry + "/${imgShortName}"
+            }
+            if (env.REPO_PUBLIC == 'true'){
+                runStage('Push image to public docker registry') {
+                    withPublicRegistry() {
+                        serviceImage.push()
+                        sh "docker rmi -f " + env.REGISTRY + "/${imgShortName}"
+                    }
+                }
             }
         }
     }
     finally {
         runStage('Remove local image') {
             // Remove the image to keep Jenkins runner clean.
-            sh "docker rmi ${imgShortName}"
+            sh "docker rmi -f ${imgShortName}"
         }
     }
 }
