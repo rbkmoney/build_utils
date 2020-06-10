@@ -11,12 +11,6 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     // host url for database. If null - DB will not start
     env.DB_HOST_NAME = dbHostName
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
-    if (env.REPO_PUBLIC == 'true') {
-      mvnArgs += ' -Ppublic,sign '
-    }
-    else {
-      mvnArgs += ' -Pprivate,sign '
-    }
 
     // Using withRegistry() for auth on docker hub server.
     // Pull it to local images with short name and reopen it with full name, to exclude double naming problem
