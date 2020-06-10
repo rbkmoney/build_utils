@@ -2,12 +2,6 @@
 def call(String buildImageTag, String mvnArgs = "") {
 
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
-    if (env.REPO_PUBLIC == 'true') {
-        mvnArgs += ' -Ppublic,sign '
-    }
-    else {
-        mvnArgs += ' -Pprivate,sign '
-    }
 
     def buildContainer = docker.image("rbkmoney/build:${buildImageTag}")
     runStage('Pull build image') {
