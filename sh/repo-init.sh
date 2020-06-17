@@ -23,8 +23,7 @@ if [[ "${remote_uri}" == "git+ssh"* ]]; then
 fi
 if [[ -d "${d_repo}/.git" ]]; then
     einfo "Syncing repository ${d_repo}"
-    git -C "${d_repo}" fetch -q origin master --shallow-since="${shallow_since}" || exit $?
-    git -C "${d_repo}" checkout -fq master || exit $?
+    git -C "${d_repo}" fetch -q origin --shallow-since="${shallow_since}" || exit $?
 else
     einfo "Initialising repository ${d_repo}"
     if [[ -d "${d_repo}" ]]; then
