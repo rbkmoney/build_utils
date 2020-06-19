@@ -7,9 +7,9 @@ def call(Closure body) {
     }
 
     // Run security tests and quality analysis and wait for results
-    runJavaSecurityTools(mvnArgs)
+    runJavaSecurityTools()
     // Wait for security and quality analysis results
-    getJavaSecurityResults(mvnArgs)
+    getJavaSecurityResults()
 
 }
 
