@@ -13,7 +13,7 @@ endif
 # Image with build/dev environment
 BUILD_IMAGE := "$(REGISTRY)/$(ORG_NAME)/build:$(BUILD_IMAGE_TAG)"
 
-UTIL_TARGETS := wc_shell wc_% wdeps_% run_w_container_% check_w_container_%
+UTIL_TARGETS := wc_cmd wc_shell wc_% wdeps_% run_w_container_% check_w_container_%
 
 DOCKER_RUN_PREFIX = $(DOCKER) run --rm -v $$PWD:$$PWD --workdir $$PWD
 ifdef GITHUB_PRIVKEY
@@ -43,6 +43,11 @@ DOCKER_RUN_PREFIX += $(DOCKER_RUN_OPTS)
 # Not applicable for use in CI.
 wc_shell:
 	$(DOCKER_RUN_PREFIX) -i $(BUILD_IMAGE) $(DOCKER_RUN_CMD) $(UNAME) $(GNAME)
+
+# Run cmd in build container.
+wc_cmd:
+	$(if $(WC_CMD),,echo "WC_CMD is not set" ; exit 1)
+	$(DOCKER_RUN_PREFIX) $(DOCKER_OPTIONS) $(BUILD_IMAGE) $(DOCKER_RUN_CMD) -c '$(WC_CMD)' $(UNAME) $(GNAME)
 
 # Run a target in container
 wc_%:
