@@ -1,5 +1,5 @@
 // Default pipeline for Erlang services
-def runPipe(boolean testWithDependencies = false, boolean runInParallel = false) {
+def runPipe(boolean testWithDependencies = false) {
     withPrivateRegistry() {
         if (masterlikeBranch()) {
             // RELEASE pipe
@@ -28,76 +28,26 @@ def runPipe(boolean testWithDependencies = false, boolean runInParallel = false)
                     sh 'make wc_compile'
                 }
             }
-            if (runInParallel) {
-                runTestsInParallel(testWithDependencies)
-            } else {
-                runTests(testWithDependencies)
+            runStage('lint') {
+                sh 'make wc_lint'
             }
-        }
-        runErlSecurityTools()
-    }
-}
-
-def runTests(testWithDependencies)  {
-    println("PIPELINE: run sequentially")
-    def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
-    runStage('lint') {
-        sh 'make wc_lint'
-    }
-    runStage('xref') {
-        sh 'make wc_xref'
-    }
-    runStage('dialyze') {
-        withDialyzerCache() {
-            sh 'make wc_dialyze'
-        }
-    }
-    runStage('test') {
-        if (testWithDependencies) {
-            sh "make wc_test"
-        } else {
-            sh "make wdeps_test"
-        }
-    }
-}
-
-def runTestsInParallel(testWithDependencies) {
-    println("PIPELINE: run in parallel")
-    def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
-    pipeline {
-        stages {
-            stage('Parallel') {
-                failFast true
-                parallel {
-                    stage('lint') {
-                        steps {
-                            sh 'make wc_lint'
-                        }
-                    }
-                    stage('xref') {
-                        steps {
-                            sh 'make wc_xref'
-                        }
-                    }
-                    stage('dialyze') {
-                        steps {
-                            withDialyzerCache() {
-                                sh 'make wc_dialyze'
-                            }
-                        }
-                    }
-                    stage('test') {
-                        steps {
-                            if (testWithDependencies) {
-                                sh "make wc_test"
-                            } else {
-                                sh "make wdeps_test"
-                            }
-                        }
-                    }
+            runStage('xref') {
+                sh 'make wc_xref'
+            }
+            runStage('dialyze') {
+                withDialyzerCache() {
+                    sh 'make wc_dialyze'
+                }
+            }
+            runStage('test') {
+                if (testWithDependencies) {
+                    sh "make wc_test"
+                } else {
+                    sh "make wdeps_test"
                 }
             }
         }
+        runErlSecurityTools()
     }
 }
 
