@@ -79,9 +79,9 @@ def runTestsInParallel(testWithDependencies) {
     }, test: {
         runStage('test') {
             if (testWithDependencies) {
-                sh "make wc_test"
-            } else {
                 sh "make wdeps_test"
+            } else {
+                sh "make wc_test"
             }
         }
     }
