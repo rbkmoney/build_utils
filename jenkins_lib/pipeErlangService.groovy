@@ -1,6 +1,5 @@
 // Default pipeline for Erlang services
 def call(boolean testWithDependencies = false, boolean runInParallel = false, Closure body) {
-    def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
     withPrivateRegistry() {
         if (masterlikeBranch()) {
             // RELEASE pipe
@@ -40,6 +39,7 @@ def call(boolean testWithDependencies = false, boolean runInParallel = false, Cl
 }
 
 def runTests(testWithDependencies)  {
+    def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
     runStage('lint') {
         sh 'make wc_lint'
     }
@@ -61,6 +61,7 @@ def runTests(testWithDependencies)  {
 }
 
 def runTestsInParallel(testWithDependencies) {
+    def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
     stages = [
             runStage('lint') {
                 sh 'make wc_lint'
