@@ -64,18 +64,18 @@ def runTests(testWithDependencies)  {
 def runTestsInParallel(testWithDependencies) {
     println("PIPELINE: run tests in parallel")
     def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
-    parallel {
+    stages = [
         runStage('lint') {
             sh 'make wc_lint'
-        }
+        },
         runStage('xref') {
             sh 'make wc_xref'
-        }
+        },
         runStage('dialyze') {
             withDialyzerCache() {
                 sh 'make wc_dialyze'
             }
-        }
+        },
         runStage('test') {
             if (testWithDependencies) {
                 sh "make wc_test"
@@ -83,7 +83,8 @@ def runTestsInParallel(testWithDependencies) {
                 sh "make wdeps_test"
             }
         }
-    }
+    ]
+    parallel stages
 }
 
 return this;
