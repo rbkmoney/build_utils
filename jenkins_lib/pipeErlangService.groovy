@@ -39,6 +39,7 @@ def call(boolean testWithDependencies = false, boolean runInParallel = false, Cl
 }
 
 def runTests(testWithDependencies)  {
+    println("PIPELINE: run tests sequentially")
     def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
     runStage('lint') {
         sh 'make wc_lint'
@@ -61,6 +62,7 @@ def runTests(testWithDependencies)  {
 }
 
 def runTestsInParallel(testWithDependencies) {
+    println("PIPELINE: run tests in parallel")
     def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
     parallel {
         runStage('lint') {
