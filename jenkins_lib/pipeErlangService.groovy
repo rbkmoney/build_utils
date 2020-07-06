@@ -1,5 +1,5 @@
 // Default pipeline for Erlang services
-def run(boolean testWithDependencies = false, boolean runInParallel = false) {
+def runPipe(boolean testWithDependencies = false, boolean runInParallel = false) {
     def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
     withPrivateRegistry() {
         if (masterlikeBranch()) {
