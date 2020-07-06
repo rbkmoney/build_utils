@@ -13,7 +13,7 @@ static def suffix() {
     Random rand = new Random(System.currentTimeMillis())
 
     def passChars = (0..6).collect { pool[rand.nextInt(pool.size())] }
-    passChars.join()
+    passChars.join("")
 }
 
 return this;
