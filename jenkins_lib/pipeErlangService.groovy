@@ -1,37 +1,34 @@
 // Default pipeline for Erlang services
 def runPipe(boolean testWithDependencies = true, boolean runInParallel = false) {
     withPrivateRegistry() {
-        if (masterlikeBranch()) {
-            // RELEASE pipe
-            runStage('make release') {
-                withGithubPrivkey {
-                    sh "make wc_release"
-                }
+        runStage('compile') {
+            withGithubPrivkey {
+                sh 'make wc_compile'
             }
-            runStage('build image') {
-                sh "make build_image"
+        }
+        if (runInParallel) {
+            runTestsInParallel(testWithDependencies)
+        } else {
+            runTestsSequentially(testWithDependencies)
+        }
+        runStage('make release') {
+            withGithubPrivkey {
+                sh "make wc_release"
             }
+        }
+        runStage('build image') {
+            sh "make build_image"
+        }
 
-            try {
+        try {
+            if (masterlikeBranch()) {
                 runStage('push image') {
                     sh "make push_image"
                 }
-            } finally {
-                runStage('rm local image') {
-                    sh 'make rm_local_image'
-                }
             }
-        } else {
-            // TEST pipe
-            runStage('compile') {
-                withGithubPrivkey {
-                    sh 'make wc_compile'
-                }
-            }
-            if (runInParallel) {
-                runTestsInParallel(testWithDependencies)
-            } else {
-                runTestsSequentially(testWithDependencies)
+        } finally {
+            runStage('rm local image') {
+                sh 'make rm_local_image'
             }
         }
         runErlSecurityTools()
