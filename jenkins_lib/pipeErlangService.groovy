@@ -1,5 +1,5 @@
 // Default pipeline for Erlang services
-def call(boolean testWithContainer = false) {
+def call(boolean testWithDependencies = false) {
     def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
     withPrivateRegistry() {
         if (masterlikeBranch()) {
@@ -41,7 +41,7 @@ def call(boolean testWithContainer = false) {
                 }
             }
             runStage('test') {
-                if (testWithContainer) {
+                if (testWithDependencies) {
                     sh "make wc_test"
                 } else {
                     sh "make wdeps_test"
