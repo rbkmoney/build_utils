@@ -1,5 +1,5 @@
 // Default pipeline for Erlang services
-def runPipe(boolean testWithDependencies = false, boolean runInParallel = false) {
+def runPipe(boolean testWithDependencies = true, boolean runInParallel = false) {
     withPrivateRegistry() {
         if (masterlikeBranch()) {
             // RELEASE pipe
