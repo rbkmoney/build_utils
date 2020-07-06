@@ -31,15 +31,14 @@ def runPipe(boolean testWithDependencies = false, boolean runInParallel = false)
             if (runInParallel) {
                 runTestsInParallel(testWithDependencies)
             } else {
-                runTests(testWithDependencies)
+                runTestsSequentially(testWithDependencies)
             }
         }
         runErlSecurityTools()
     }
 }
 
-def runTests(testWithDependencies)  {
-    println("PIPELINE: run sequentially")
+def runTestsSequentially(testWithDependencies)  {
     def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
     runStage('lint') {
         sh 'make wc_lint'
@@ -62,26 +61,20 @@ def runTests(testWithDependencies)  {
 }
 
 def runTestsInParallel(testWithDependencies) {
-    println("PIPELINE: run in parallel")
     def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
-    parallel checks: {
-        runStage('lint') {
-            sh 'make wc_lint'
+    parallel lint: {
+        sh 'make wc_lint'
+    }, xref: {
+        sh 'make wc_xref'
+    }, dialyze: {
+        withDialyzerCache() {
+            sh 'make wc_dialyze'
         }
-        runStage('xref') {
-            sh 'make wc_xref'
-        }
-        runStage('dialyze') {
-            withDialyzerCache() {
-                sh 'make wc_dialyze'
-            }
-        }
-        runStage('test') {
-            if (testWithDependencies) {
-                sh "make wc_test"
-            } else {
-                sh "make wdeps_test"
-            }
+    }, test: {
+        if (testWithDependencies) {
+            sh "make wc_test"
+        } else {
+            sh "make wdeps_test"
         }
     }
 }
