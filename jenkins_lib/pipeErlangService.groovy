@@ -39,7 +39,7 @@ def runPipe(boolean testWithDependencies = false, boolean runInParallel = false)
 }
 
 def runTests(testWithDependencies)  {
-    println("PIPELINE: run tests sequentially")
+    println("PIPELINE: run sequentially")
     def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
     runStage('lint') {
         sh 'make wc_lint'
@@ -62,29 +62,36 @@ def runTests(testWithDependencies)  {
 }
 
 def runTestsInParallel(testWithDependencies) {
-    println("PIPELINE: run tests in parallel")
+    println("PIPELINE: run in parallel")
     def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
-    stages = [
+    parallel {
         stage('lint') {
-            sh 'make wc_lint'
-        },
-            stage('xref') {
-            sh 'make wc_xref'
-        },
-        stage('dialyze') {
-            withDialyzerCache() {
-                sh 'make wc_dialyze'
-            }
-        },
-        stage('test') {
-            if (testWithDependencies) {
-                sh "make wc_test"
-            } else {
-                sh "make wdeps_test"
+            steps {
+                sh 'make wc_lint'
             }
         }
-    ]
-    parallel stages
+        stage('xref') {
+            steps {
+                sh 'make wc_xref'
+            }
+        }
+        stage('dialyze') {
+            steps {
+                withDialyzerCache() {
+                    sh 'make wc_dialyze'
+                }
+            }
+        }
+        stage('test') {
+            steps {
+                if (testWithDependencies) {
+                    sh "make wc_test"
+                } else {
+                    sh "make wdeps_test"
+                }
+            }
+        }
+    }
 }
 
 return this;
