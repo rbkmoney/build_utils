@@ -62,27 +62,26 @@ def runTests(testWithDependencies)  {
 
 def runTestsInParallel(testWithDependencies) {
     def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
-    stages = [
-            runStage('lint') {
-                sh 'make wc_lint'
-            },
-            runStage('xref') {
-                sh 'make wc_xref'
-            },
-            runStage('dialyze') {
-                withDialyzerCache() {
-                    sh 'make wc_dialyze'
-                }
-            },
-            runStage('test') {
-                if (testWithDependencies) {
-                    sh "make wc_test"
-                } else {
-                    sh "make wdeps_test"
-                }
+    parallel {
+        runStage('lint') {
+            sh 'make wc_lint'
+        }
+        runStage('xref') {
+            sh 'make wc_xref'
+        }
+        runStage('dialyze') {
+            withDialyzerCache() {
+                sh 'make wc_dialyze'
             }
-    ]
-    parallel stages
+        }
+        runStage('test') {
+            if (testWithDependencies) {
+                sh "make wc_test"
+            } else {
+                sh "make wdeps_test"
+            }
+        }
+    }
 }
 
 return this;
