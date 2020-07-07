@@ -8,8 +8,7 @@ CALL_W_CONTAINER += java.compile java.deploy java.install java.settings
 MVN = mvn --no-transfer-progress --batch-mode
 
 ifdef SETTINGS_XML
-DOCKER_RUN_OPTS = -v "$(SETTINGS_XML):$(SETTINGS_XML)"
-DOCKER_RUN_OPTS += -e SETTINGS_XML="$(SETTINGS_XML)"
+DOCKER_RUN_OPTS += -v "$(SETTINGS_XML):$(SETTINGS_XML)" -e SETTINGS_XML
 MVN += -s "$(SETTINGS_XML)"
 endif
 
@@ -30,17 +29,17 @@ endif
 MVN += -Dpath_to_thrift="$(THRIFT)" -Dcommit.number="$(NUMBER_COMMITS)"
 
 ifdef MVN_PROFILE
-DOCKER_RUN_OPTS += -e MVN_PROFILE="$(MVN_PROFILE)"
+DOCKER_RUN_OPTS += -e MVN_PROFILE
 endif
 
 ifdef GNUPGHOME
-DOCKER_RUN_OPTS += -v "$(GNUPGHOME):$(GNUPGHOME):ro" -e GNUPGHOME="$(GNUPGHOME)"
+DOCKER_RUN_OPTS += -v "$(GNUPGHOME):$(GNUPGHOME):ro" -e GNUPGHOME
 endif
 
 ifdef GPG_KEYID
 ifdef GPG_PASSPHRASE
 MVN += -Dgpg.keyname="$(GPG_KEYID)" -Dgpg.passphrase="$(GPG_PASSPHRASE)"
-DOCKER_RUN_OPTS += -e GPG_KEYID="$(GPG_KEYID)" -e GPG_PASSPHRASE="$(GPG_PASSPHRASE)"
+DOCKER_RUN_OPTS += -e GPG_KEYID -e GPG_PASSPHRASE
 endif
 endif
 
