@@ -153,6 +153,9 @@ build('build_utils', 'docker-host', finalHook) {
     runStage('test utils_container (wdeps)') {
       sh 'make wdeps_smoke_test'
     }
+    runStage('test cmd in container') {
+      sh "make wc_cmd WC_CMD='make smoke_test'"
+    }
 
     runStage('test utils_image (build image)') {
       sh 'make build_image'
