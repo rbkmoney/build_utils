@@ -11,7 +11,8 @@ def call() {
       }
     }
   }
-
+  // Wrap security tools in wc_cmd
+  env.MAKE_ENV = 'true'
   // Run security tests and quality analysis and wait for results
   runJavaSecurityTools()
   // Wait for security and quality analysis results
