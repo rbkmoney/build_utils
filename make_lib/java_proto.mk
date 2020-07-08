@@ -52,5 +52,4 @@ java.install: java.settings
 
 java.settings:
 	$(if $(SETTINGS_XML),, echo "SETTINGS_XML not defined"; exit 1)
-	$(MVN) help:all-profiles && \
-	$(MVN) help:effective-pom
+	$(MVN) help:all-profiles
