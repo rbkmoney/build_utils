@@ -1,4 +1,4 @@
-// Default pipeline for Erlang services
+// Default pipeline for Erlang libraries
 def runPipe(boolean testWithDependencies = true, boolean runInParallel = false) {
     def erlangUtils = load("${env.JENKINS_LIB}/pipeErlangUtils.groovy")
     withPrivateRegistry() {
@@ -11,26 +11,6 @@ def runPipe(boolean testWithDependencies = true, boolean runInParallel = false) 
             erlangUtils.runTestsInParallel(testWithDependencies)
         } else {
             erlangUtils.runTestsSequentially(testWithDependencies)
-        }
-        runStage('make release') {
-            withGithubPrivkey {
-                sh "make wc_release"
-            }
-        }
-        runStage('build image') {
-            sh "make build_image"
-        }
-
-        try {
-            if (masterlikeBranch()) {
-                runStage('push image') {
-                    sh "make push_image"
-                }
-            }
-        } finally {
-            runStage('rm local image') {
-                sh 'make rm_local_image'
-            }
         }
         runErlSecurityTools()
     }
