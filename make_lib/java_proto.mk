@@ -1,4 +1,3 @@
-# Java
 ifndef THRIFT
 THRIFT = $(or $(shell which thrift), $(error "`thrift' executable missing"))
 endif
@@ -32,16 +31,12 @@ ifdef MVN_PROFILE
 DOCKER_RUN_OPTS += -e MVN_PROFILE
 endif
 
-ifdef GNUPGHOME
-DOCKER_RUN_OPTS += -v "$(GNUPGHOME):$(GNUPGHOME):ro" -e GNUPGHOME
+ifneq ($(and $(GNUPGHOME),$(GPG_KEYID),$(GPG_PASSPHRASE)),)
+DOCKER_RUN_OPTS += -v "$(GNUPGHOME):$(GNUPGHOME):rw" -e GNUPGHOME -e GPG_KEYID -e GPG_PASSPHRASE
+MVN += -Dgpg.keyname="$(GPG_KEYID)" -Dgpg.passphrase="$(GPG_PASSPHRASE)"
 endif
 
-ifdef GPG_KEYID
-ifdef GPG_PASSPHRASE
-MVN += -Dgpg.keyname="$(GPG_KEYID)" -Dgpg.passphrase="$(GPG_PASSPHRASE)"
-DOCKER_RUN_OPTS += -e GPG_KEYID -e GPG_PASSPHRASE
-endif
-endif
+.PHONY: java.compile java.deploy java.install java.settings
 
 java.compile: java.settings
 	$(MVN) compile
