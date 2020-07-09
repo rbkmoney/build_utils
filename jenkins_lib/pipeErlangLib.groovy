@@ -1,5 +1,5 @@
 // Default pipeline for Erlang libraries
-def runPipe(boolean testWithDependencies = true, boolean runInParallel = false) {
+def runPipe(boolean testWithDependencies = true, boolean runInParallel = false, String pltHomeDir = 'default') {
     def erlangUtils = load("${env.JENKINS_LIB}/pipeErlangUtils.groovy")
     withPrivateRegistry() {
         runStage('compile') {
@@ -8,9 +8,9 @@ def runPipe(boolean testWithDependencies = true, boolean runInParallel = false) 
             }
         }
         if (runInParallel) {
-            erlangUtils.runTestsInParallel(testWithDependencies)
+            erlangUtils.runTestsInParallel(testWithDependencies, pltHomeDir)
         } else {
-            erlangUtils.runTestsSequentially(testWithDependencies)
+            erlangUtils.runTestsSequentially(testWithDependencies, pltHomeDir)
         }
         runErlSecurityTools()
     }

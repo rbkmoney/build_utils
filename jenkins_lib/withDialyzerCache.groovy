@@ -1,9 +1,9 @@
-def call(Closure body) {
+def call(String pltHomeDir, Closure body) {
     def withWsCache = load("${env.JENKINS_LIB}/withWsCache.groovy")
     String OtpReleaseFN = "otp_version." + suffix()
     sh "make wc_cmd WC_CMD='${env.SH_TOOLS}/otp_version ${OtpReleaseFN}'"
     String OtpRelease = readFile OtpReleaseFN
-    def Plt = ["_build/default/rebar3_",OtpRelease,"_plt"].join("")
+    def Plt = "_build/${pltHomeDir}/rebar3_${OtpRelease}_plt"
     withWsCache(Plt, body)
 }
 
