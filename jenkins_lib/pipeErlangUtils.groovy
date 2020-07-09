@@ -1,4 +1,4 @@
-def runTestsSequentially(testWithDependencies)  {
+def runTestsSequentially(boolean testWithDependencies, String pltHomeDir)  {
     def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
     runStage('lint') {
         sh 'make wc_lint'
@@ -7,7 +7,7 @@ def runTestsSequentially(testWithDependencies)  {
         sh 'make wc_xref'
     }
     runStage('dialyze') {
-        withDialyzerCache() {
+        withDialyzerCache(pltHomeDir) {
             sh 'make wc_dialyze'
         }
     }
@@ -20,7 +20,7 @@ def runTestsSequentially(testWithDependencies)  {
     }
 }
 
-def runTestsInParallel(testWithDependencies) {
+def runTestsInParallel(boolean testWithDependencies, String pltHomeDir) {
     def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
     stages = [
             failFast: true,
@@ -36,7 +36,7 @@ def runTestsInParallel(testWithDependencies) {
             },
             dialyze: {
                 runStage('dialyze') {
-                    withDialyzerCache() {
+                    withDialyzerCache(pltHomeDir) {
                         sh 'make wc_dialyze'
                     }
                 }

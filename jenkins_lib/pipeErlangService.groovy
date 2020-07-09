@@ -1,5 +1,5 @@
 // Default pipeline for Erlang services
-def runPipe(boolean testWithDependencies = true, boolean runInParallel = false) {
+def runPipe(boolean testWithDependencies = true, boolean runInParallel = false, String pltHomeDir = 'default') {
     def erlangUtils = load("${env.JENKINS_LIB}/pipeErlangUtils.groovy")
     withPrivateRegistry() {
         runStage('compile') {
