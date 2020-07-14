@@ -2,7 +2,7 @@
 def runPipe(boolean testWithDependencies = true, boolean runInParallel = false, String pltHomeDir = 'default') {
     def erlangUtils = load("${env.JENKINS_LIB}/pipeErlangUtils.groovy")
     withPrivateRegistry() {
-        if (!masterlikeBranch()) {
+        if (env.BRANCH_NAME != 'master') {
             runStage('compile') {
                 withGithubPrivkey {
                     sh 'make wc_compile'
