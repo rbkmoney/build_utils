@@ -1,6 +1,5 @@
 // Default pipeline for Erlang services
 def runPipe(boolean testWithDependencies = true, boolean runInParallel = false, String pltHomeDir = 'default') {
-    def erlangUtils = load("${env.JENKINS_LIB}/pipeErlangUtils.groovy")
     withPrivateRegistry() {
         if (env.BRANCH_NAME != 'master') {
             runStage('compile') {
@@ -8,6 +7,7 @@ def runPipe(boolean testWithDependencies = true, boolean runInParallel = false, 
                     sh 'make wc_compile'
                 }
             }
+            def erlangUtils = load("${env.JENKINS_LIB}/pipeErlangUtils.groovy")
             if (runInParallel) {
                 erlangUtils.runTestsInParallel(testWithDependencies)
             } else {
