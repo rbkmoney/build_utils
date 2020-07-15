@@ -9,9 +9,9 @@ def runPipe(boolean testWithDependencies = true, boolean runInParallel = false, 
                 }
             }
             if (runInParallel) {
-                erlangUtils.runTestsInParallel(testWithDependencies)
+                erlangUtils.runTestsInParallel(testWithDependencies, pltHomeDir)
             } else {
-                erlangUtils.runTestsSequentially(testWithDependencies)
+                erlangUtils.runTestsSequentially(testWithDependencies, pltHomeDir)
             }
         }
         runStage('make release') {
