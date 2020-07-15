@@ -2,15 +2,17 @@
 def runPipe(boolean testWithDependencies = true, boolean runInParallel = false, String pltHomeDir = 'default') {
     def erlangUtils = load("${env.JENKINS_LIB}/pipeErlangUtils.groovy")
     withPrivateRegistry() {
-        runStage('compile') {
-            withGithubPrivkey {
-                sh 'make wc_compile'
+        if (env.BRANCH_NAME != 'master') {
+            runStage('compile') {
+                withGithubPrivkey {
+                    sh 'make wc_compile'
+                }
             }
-        }
-        if (runInParallel) {
-            erlangUtils.runTestsInParallel(testWithDependencies)
-        } else {
-            erlangUtils.runTestsSequentially(testWithDependencies)
+            if (runInParallel) {
+                erlangUtils.runTestsInParallel(testWithDependencies)
+            } else {
+                erlangUtils.runTestsSequentially(testWithDependencies)
+            }
         }
         runStage('make release') {
             withGithubPrivkey {
