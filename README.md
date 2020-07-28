@@ -52,12 +52,12 @@ examples/
 ## Как подключать в свой проект
 
 1. Добавить git сабмодуль:
-    ```
+```bash
 git submodule add -b master git@github.com:rbkmoney/build_utils.git build_utils
 ```
 
 1. Обновить Makefile, выставляя необходимые переменные и подключая библиотеки. Например, для `erlang` проекта:
-    ```make
+```make
 SUBMODULES = build_utils
 SUBTARGETS = $(patsubst %,%/.git,$(SUBMODULES))
 
