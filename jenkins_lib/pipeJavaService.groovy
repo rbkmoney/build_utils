@@ -51,14 +51,14 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
                     serviceImage.push()
                     // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
                     // Untag the long-name
-                    sh "docker rmi -f " + env.REGISTRY + "/${imgShortName}"
+                    sh "docker rmi -f " + env.REGISTRY + "/${imgShortName} || true"
                 }
             }
             if (env.REPO_PUBLIC == 'true'){
                 runStage('Push image to public docker registry') {
                     withPublicRegistry() {
                         serviceImage.push()
-                        sh "docker rmi -f " + env.REGISTRY + "/${imgShortName}"
+                        sh "docker rmi -f " + env.REGISTRY + "/${imgShortName} || true"
                     }
                 }
             }
@@ -67,7 +67,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     finally {
         runStage('Remove local docker image') {
             // Remove the image to keep Jenkins runner clean.
-            sh "docker rmi -f ${imgShortName}"
+            sh "docker rmi -f ${imgShortName} || true"
         }
     }
 }
