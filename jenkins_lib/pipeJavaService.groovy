@@ -22,7 +22,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
                             ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
                     } 
                 } else {
-                    sh 'mvn package' + mvn_command_arguments
+                    sh 'mvn verify' + mvn_command_arguments + ' -Dgpg.skip=true'
                 }
             }
         }

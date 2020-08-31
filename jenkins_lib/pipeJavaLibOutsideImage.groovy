@@ -11,7 +11,7 @@ def call(String buildImageTag, String mvnArgs = "") {
                         ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
                 }
             } else {
-                sh 'mvn package --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}"
+                sh 'mvn verify --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}" + ' -Dgpg.skip=true'
             }
         }
     }

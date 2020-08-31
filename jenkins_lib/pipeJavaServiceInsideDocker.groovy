@@ -55,7 +55,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
                                 ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
                         }
                     } else {
-                        sh 'mvn package' + mvn_command_arguments
+                        sh 'mvn verify' + mvn_command_arguments + ' -Dgpg.skip=true'
                     }
                 }
             }
