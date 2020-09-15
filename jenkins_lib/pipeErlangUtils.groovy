@@ -3,6 +3,9 @@ def runTestsSequentially(boolean testWithDependencies, String pltHomeDir)  {
     runStage('lint') {
         sh 'make wc_lint'
     }
+    runStage('check format') {
+        sh 'make wc_check_format'
+    }
     runStage('xref') {
         sh 'make wc_xref'
     }
@@ -28,6 +31,10 @@ def runTestsInParallel(boolean testWithDependencies, String pltHomeDir) {
                 runStage('lint') {
                     sh 'make wc_lint'
                 }
+            },
+            check_format: {
+                runStage('check format') {
+                    sh 'make wc_check_format'
             },
             xref: {
                 runStage('xref') {
