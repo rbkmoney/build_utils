@@ -35,6 +35,7 @@ def runTestsInParallel(boolean testWithDependencies, String pltHomeDir) {
             check_format: {
                 runStage('check format') {
                     sh 'make wc_check_format'
+                }
             },
             xref: {
                 runStage('xref') {
