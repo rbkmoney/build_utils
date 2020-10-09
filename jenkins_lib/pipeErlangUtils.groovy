@@ -1,24 +1,24 @@
 def runTestsSequentially(boolean testWithDependencies, String pltHomeDir)  {
     def withDialyzerCache = load("${env.JENKINS_LIB}/withDialyzerCache.groovy")
-    runStage('lint') {
-        sh 'make wc_lint'
-    }
     runStage('check format') {
         sh 'make wc_check_format'
     }
     runStage('xref') {
         sh 'make wc_xref'
     }
-    runStage('dialyze') {
-        withDialyzerCache(pltHomeDir) {
-            sh 'make wc_dialyze'
-        }
+    runStage('lint') {
+        sh 'make wc_lint'
     }
     runStage('test') {
         if (testWithDependencies) {
             sh "make wdeps_test"
         } else {
             sh "make wc_test"
+        }
+    }
+    runStage('dialyze') {
+        withDialyzerCache(pltHomeDir) {
+            sh 'make wc_dialyze'
         }
     }
 }
