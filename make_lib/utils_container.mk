@@ -10,8 +10,12 @@ ifndef BUILD_IMAGE_TAG
 $(error BUILD_IMAGE_TAG is not set)
 endif
 
+ifndef BUILD_IMAGE_NAME
+BUILD_IMAGE_NAME := build
+endif
+
 # Image with build/dev environment
-BUILD_IMAGE := "$(REGISTRY)/$(ORG_NAME)/build:$(BUILD_IMAGE_TAG)"
+BUILD_IMAGE := "$(REGISTRY)/$(ORG_NAME)/$(BUILD_IMAGE_NAME):$(BUILD_IMAGE_TAG)"
 
 UTIL_TARGETS := wc_cmd wc_shell wc_% wdeps_% run_w_container_% check_w_container_%
 
