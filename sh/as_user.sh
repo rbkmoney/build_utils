@@ -68,8 +68,8 @@ export HOME="${homedir:-/home/${username}}"
 chown "${username}:$(if [ $use_gid -eq 1 ]; then echo ${gid}; else echo ${groupname}; fi)" "$HOME"
 
 if [ -n "$cmd" ]; then
-    su "${username}" -l -m -c "$cmd";
+    su "${username}" -m -c "$cmd";
 else
-    su "${username}" -l -m;
+    su "${username}" -m;
 fi
 
