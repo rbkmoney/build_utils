@@ -66,7 +66,6 @@ wdeps_shell:
 wdeps_%:
 	$(MAKE) -s run_w_compose_$*
 
-RAND := $(JRAND)
 DOCKER_COMPOSE_SERVICE_NAME := "$(SERVICE_NAME)$(RAND)"
 
 ## Utils
