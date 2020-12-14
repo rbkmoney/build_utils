@@ -66,7 +66,9 @@ wdeps_shell:
 wdeps_%:
 	$(MAKE) -s run_w_compose_$*
 
-DOCKER_COMPOSE_SERVICE_NAME := "$(SERVICE_NAME)$(RAND)"
+
+RND_BUILD_ID ?= $(shell echo $$RANDOM)
+DOCKER_COMPOSE_SERVICE_NAME := "$(SERVICE_NAME)$(RND_BUILD_ID)"
 
 ## Utils
 to_wdeps_shell: DOCKER_COMPOSE = $(call which,docker-compose) -p $(DOCKER_COMPOSE_SERVICE_NAME)
