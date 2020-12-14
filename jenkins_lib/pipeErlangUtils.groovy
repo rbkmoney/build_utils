@@ -11,7 +11,7 @@ def runTestsSequentially(boolean testWithDependencies, String pltHomeDir)  {
     }
     runStage('test') {
         if (testWithDependencies) {
-            sh "make wdeps_test"
+            sh "make wdeps_test JRAND=${JRAND}"
         } else {
             sh "make wc_test"
         }
@@ -52,7 +52,7 @@ def runTestsInParallel(boolean testWithDependencies, String pltHomeDir) {
             test: {
                 runStage('test') {
                     if (testWithDependencies) {
-                        sh "make wdeps_test"
+                        sh "make wdeps_test JRAND=${JRAND}"
                     } else {
                         sh "make wc_test"
                     }
