@@ -26,7 +26,7 @@ which = $(if $(shell which $(1) 2>/dev/null),\
 	$(shell which $(1) 2>/dev/null),\
 	$(error "Error: could not locate $(1)!"))
 
-DOCKER = $(call which,docker)
+DOCKER ?= $(call which,docker)
 
 validate_templates_path = $(shell \
 	if [ -n "$(TEMPLATES_PATH)" ]; then \

@@ -12,6 +12,8 @@ ifndef SERVICE_IMAGE_TAG
 $(error SERVICE_IMAGE_TAG is not set)
 endif
 
+DOCKER_BUILD_OPTIONS ?= --force-rm --no-cache
+
 ## Interface targets
 build_image:
 	$(MAKE) -s do_build_image
@@ -30,8 +32,7 @@ do_rm_local_image:
 
 ## Utils
 do_build_image: Dockerfile
-	$(DOCKER) build --force-rm --no-cache --tag $(SERVICE_IMAGE_NAME):$(SERVICE_IMAGE_TAG) . && \
-	$(DOCKER) images | grep $(SERVICE_IMAGE_TAG)
+	$(DOCKER) build $(DOCKER_BUILD_OPTIONS) --tag $(SERVICE_IMAGE_NAME):$(SERVICE_IMAGE_TAG) .
 
 do_push_image:
 	$(if $(SERVICE_IMAGE_PUSH_TAG),,echo "SERVICE_IMAGE_PUSH_TAG is not set" ; exit 1)
