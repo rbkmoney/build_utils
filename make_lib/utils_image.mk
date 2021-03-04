@@ -32,8 +32,7 @@ do_rm_local_image:
 
 ## Utils
 do_build_image: Dockerfile
-	$(DOCKER) build $(DOCKER_BUILD_OPTIONS) --tag $(SERVICE_IMAGE_NAME):$(SERVICE_IMAGE_TAG) . && \
-	$(DOCKER) images | grep $(SERVICE_IMAGE_TAG)
+	$(DOCKER) build $(DOCKER_BUILD_OPTIONS) --tag $(SERVICE_IMAGE_NAME):$(SERVICE_IMAGE_TAG) .
 
 do_push_image:
 	$(if $(SERVICE_IMAGE_PUSH_TAG),,echo "SERVICE_IMAGE_PUSH_TAG is not set" ; exit 1)
