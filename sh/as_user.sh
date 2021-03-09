@@ -67,9 +67,16 @@ useradd $(test -n "$uid" && echo "-u $uid") \
 export HOME="${homedir:-/home/${username}}"
 chown "${username}:$(if [ $use_gid -eq 1 ]; then echo ${gid}; else echo ${groupname}; fi)" "$HOME"
 
+# Skip -l flag for debian which brake build
+distr=$(grep '^ID=' /etc/*-release | cut -d = -f 2)
+case $distr in
+  debian) login="" ;;
+  *) login="-l" ;;
+esac
+
 if [ -n "$cmd" ]; then
-    su "${username}" -l -m -c "$cmd";
+    su "${username}" ${login} -m -c "$cmd";
 else
-    su "${username}" -l -m;
+    su "${username}" ${login} -m;
 fi
 
