@@ -18,9 +18,9 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
                         " ${mvnArgs}"
                 if (env.BRANCH_NAME == 'master') {
                     withGPG() {
-                        sh 'mvn deploy' + mvn_command_arguments + 
+                        sh 'mvn deploy' + mvn_command_arguments +
                             ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
-                    } 
+                    }
                 } else {
                     sh 'mvn verify' + mvn_command_arguments + ' -Dgpg.skip=true'
                 }
@@ -33,7 +33,8 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
 
     //run docker build, while Sonar runs analysis
     def serviceImage
-    def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
+    def defShortImgName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
+    def imgShortName = env.BRANCH_NAME.startsWith('epic') ? defShortImgName + '-epic' : defShortImgName
     getCommitId()
     runStage('Build local service docker image') {
         withPrivateRegistry() {
