@@ -68,7 +68,7 @@ export HOME="${homedir:-/home/${username}}"
 chown "${username}:$(if [ $use_gid -eq 1 ]; then echo ${gid}; else echo ${groupname}; fi)" "$HOME"
 
 # Skip -l flag for debian which brake build
-distr=$(grep '^ID=' /etc/*-release | cut -d = -f 2)
+distr="$(find /etc/ -maxdepth 1 -name '*-release' -print0 | xargs -0 grep '^ID=' | cut -d = -f 2)"
 case $distr in
   debian) login="" ;;
   *) login="-l" ;;
@@ -79,4 +79,3 @@ if [ -n "$cmd" ]; then
 else
     su "${username}" ${login} -m;
 fi
-
