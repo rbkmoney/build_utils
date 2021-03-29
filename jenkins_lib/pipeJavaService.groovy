@@ -33,8 +33,11 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
 
     //run docker build, while Sonar runs analysis
     def serviceImage
-    def defShortImgName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
-    def imgShortName = env.BRANCH_NAME.startsWith('epic') ? defShortImgName + '-epic' : defShortImgName
+    def latestServiceImage
+    def defaultImgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
+    def imgShortName = env.BRANCH_NAME.startsWith('epic') ? defaultImgShortName + '-epic' : defaultImgShortName
+    def latestImgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':latest'
+
     getCommitId()
     runStage('Build local service docker image') {
         withPrivateRegistry() {
@@ -56,10 +59,17 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
                 }
             }
             if (env.REPO_PUBLIC == 'true'){
+                runStage('Build latest service docker image') {
+                    withPrivateRegistry() {
+                        latestServiceImage = docker.build(latestImgShortName, '-f ./target/Dockerfile ./target')
+                    }
+                }
                 runStage('Push image to public docker registry') {
                     withPublicRegistry() {
                         serviceImage.push()
                         sh "docker rmi -f " + env.REGISTRY + "/${imgShortName} || true"
+                        latestServiceImage.push()
+                        sh "docker rmi -f " + env.REGISTRY + "/${latestImgShortName} || true"
                     }
                 }
             }
@@ -69,6 +79,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
         runStage('Remove local docker image') {
             // Remove the image to keep Jenkins runner clean.
             sh "docker rmi -f ${imgShortName} || true"
+            sh "docker rmi -f ${latestImgShortName} || true"
         }
     }
 }
