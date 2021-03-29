@@ -33,15 +33,13 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
 
     //run docker build, while Sonar runs analysis
     def serviceImage
-    def latestServiceImage
-    def defaultImgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
-    def imgShortName = env.BRANCH_NAME.startsWith('epic') ? defaultImgShortName + '-epic' : defaultImgShortName
-    def latestImgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':latest'
+    def defaultImageShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
+    def imageShortName = env.BRANCH_NAME.startsWith('epic') ? defaultImageShortName + '-epic' : defaultImageShortName
 
     getCommitId()
     runStage('Build local service docker image') {
         withPrivateRegistry() {
-            serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
+            serviceImage = docker.build(imageShortName, '-f ./target/Dockerfile ./target')
         }
     }
 
@@ -55,21 +53,15 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
                     serviceImage.push()
                     // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
                     // Untag the long-name
-                    sh "docker rmi -f " + env.REGISTRY + "/${imgShortName} || true"
+                    sh "docker rmi -f " + env.REGISTRY + "/${imageShortName} || true"
                 }
             }
             if (env.REPO_PUBLIC == 'true'){
-                runStage('Build latest service docker image') {
-                    withPrivateRegistry() {
-                        latestServiceImage = docker.build(latestImgShortName, '-f ./target/Dockerfile ./target')
-                    }
-                }
                 runStage('Push image to public docker registry') {
                     withPublicRegistry() {
                         serviceImage.push()
-                        sh "docker rmi -f " + env.REGISTRY + "/${imgShortName} || true"
-                        latestServiceImage.push()
-                        sh "docker rmi -f " + env.REGISTRY + "/${latestImgShortName} || true"
+                        serviceImage.push('latest')
+                        sh "docker rmi -f " + env.REGISTRY + "/${imageShortName} || true"
                     }
                 }
             }
@@ -78,8 +70,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     finally {
         runStage('Remove local docker image') {
             // Remove the image to keep Jenkins runner clean.
-            sh "docker rmi -f ${imgShortName} || true"
-            sh "docker rmi -f ${latestImgShortName} || true"
+            sh "docker rmi -f ${imageShortName} || true"
         }
     }
 }
