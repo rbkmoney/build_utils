@@ -4,7 +4,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     env.SERVICE_NAME = serviceName
     // use java11 or use std JAVA_HOME (java8)
     if (useJava11) {
-      env.JAVA_HOME = sh(returnStdout: true, script: 'java-config --select-vm openjdk-bin-11 --jdk-home').trim()
+        env.JAVA_HOME = sh(returnStdout: true, script: 'java-config --select-vm openjdk-bin-11 --jdk-home').trim()
     }
 
     // mvnArgs - arguments for mvn. For example: ' -DjvmArgs="-Xmx256m" '
@@ -19,7 +19,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
                 if (env.BRANCH_NAME == 'master') {
                     withGPG() {
                         sh 'mvn deploy' + mvn_command_arguments +
-                            ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
+                                ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
                     }
                 } else {
                     sh 'mvn verify' + mvn_command_arguments + ' -Dgpg.skip=true'
@@ -33,12 +33,13 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
 
     //run docker build, while Sonar runs analysis
     def serviceImage
-    def defShortImgName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
-    def imgShortName = env.BRANCH_NAME.startsWith('epic') ? defShortImgName + '-epic' : defShortImgName
+    def defaultImageShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
+    def imageShortName = env.BRANCH_NAME.startsWith('epic') ? defaultImageShortName + '-epic' : defaultImageShortName
+
     getCommitId()
     runStage('Build local service docker image') {
         withPrivateRegistry() {
-            serviceImage = docker.build(imgShortName, '-f ./target/Dockerfile ./target')
+            serviceImage = docker.build(imageShortName, '-f ./target/Dockerfile ./target')
         }
     }
 
@@ -52,14 +53,17 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
                     serviceImage.push()
                     // Push under 'withRegistry' generates 2d record with 'long name' in local docker registry.
                     // Untag the long-name
-                    sh "docker rmi -f " + env.REGISTRY + "/${imgShortName} || true"
+                    sh "docker rmi -f " + env.REGISTRY + "/${imageShortName} || true"
                 }
             }
-            if (env.REPO_PUBLIC == 'true'){
+            if (env.REPO_PUBLIC == 'true') {
                 runStage('Push image to public docker registry') {
                     withPublicRegistry() {
                         serviceImage.push()
-                        sh "docker rmi -f " + env.REGISTRY + "/${imgShortName} || true"
+                        if (env.BRANCH_NAME == 'master') {
+                            serviceImage.push('latest')
+                        }
+                        sh "docker rmi -f " + env.REGISTRY + "/${imageShortName} || true"
                     }
                 }
             }
@@ -68,7 +72,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     finally {
         runStage('Remove local docker image') {
             // Remove the image to keep Jenkins runner clean.
-            sh "docker rmi -f ${imgShortName} || true"
+            sh "docker rmi -f ${imageShortName} || true"
         }
     }
 }
