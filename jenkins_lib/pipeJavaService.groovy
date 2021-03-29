@@ -4,7 +4,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     env.SERVICE_NAME = serviceName
     // use java11 or use std JAVA_HOME (java8)
     if (useJava11) {
-      env.JAVA_HOME = sh(returnStdout: true, script: 'java-config --select-vm openjdk-bin-11 --jdk-home').trim()
+        env.JAVA_HOME = sh(returnStdout: true, script: 'java-config --select-vm openjdk-bin-11 --jdk-home').trim()
     }
 
     // mvnArgs - arguments for mvn. For example: ' -DjvmArgs="-Xmx256m" '
@@ -19,7 +19,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
                 if (env.BRANCH_NAME == 'master') {
                     withGPG() {
                         sh 'mvn deploy' + mvn_command_arguments +
-                            ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
+                                ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
                     }
                 } else {
                     sh 'mvn verify' + mvn_command_arguments + ' -Dgpg.skip=true'
@@ -56,11 +56,13 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
                     sh "docker rmi -f " + env.REGISTRY + "/${imageShortName} || true"
                 }
             }
-            if (env.REPO_PUBLIC == 'true'){
+            if (env.REPO_PUBLIC == 'true') {
                 runStage('Push image to public docker registry') {
                     withPublicRegistry() {
                         serviceImage.push()
-                        serviceImage.push('latest')
+                        if (env.BRANCH_NAME == 'master') {
+                            serviceImage.push('latest')
+                        }
                         sh "docker rmi -f " + env.REGISTRY + "/${imageShortName} || true"
                     }
                 }
