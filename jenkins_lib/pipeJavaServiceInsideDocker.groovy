@@ -1,5 +1,7 @@
 // Not actual (but maybe useful in the future) pipeline for Java service
 def call(String serviceName, String baseImageTag, String buildImageTag, String dbHostName, String mvnArgs = "") {
+    //todo change for dr?
+    env.REGISTRY = "ghcr.io"
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
     // service java image tag
