@@ -18,7 +18,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     runStage('Pull build image') {
         withPrivateRegistry() {
             buildContainer.pull()
-            buildContainer = docker.image(env.REGISTRY + '/rbkmoney/java-build:$BUILD_IMAGE_TAG')
+            buildContainer = docker.image(env.REGISTRY + '/rbkmoney/build-java:$BUILD_IMAGE_TAG')
         }
     }
 
