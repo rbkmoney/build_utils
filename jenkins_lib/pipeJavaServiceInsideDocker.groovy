@@ -44,8 +44,8 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
         runStage('Execute build container') {
             withMaven() {
                 buildContainer.inside(insideParams) {
-                    sh 'docker ps -a'
-                    sh 'docker port ' + postgresImage.name()
+                    //todo remove garbage
+                    docker.ps()
                     def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
                             '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
                             '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
