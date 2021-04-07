@@ -32,6 +32,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
                 withPrivateRegistry() {
                     postgresImage = docker.image(env.REGISTRY + '/rbkmoney/postgres:11.4')
                             .run(
+                                '-p 5432:5432 ' +
                                 '-e POSTGRES_PASSWORD=postgres ' +
                                 '-e POSTGRES_USER=postgres ' +
                                 '-e POSTGRES_DB=$DB_NAME '
@@ -44,8 +45,6 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
         runStage('Execute build container') {
             withMaven() {
                 buildContainer.inside(insideParams) {
-                    //todo remove garbage
-                    docker.ps()
                     def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
                             '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
                             '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
