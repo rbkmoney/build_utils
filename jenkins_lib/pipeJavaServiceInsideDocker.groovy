@@ -1,7 +1,5 @@
 // Not actual (but maybe useful in the future) pipeline for Java service
 def call(String serviceName, String baseImageTag, String buildImageTag, String dbHostName, String mvnArgs = "") {
-    //todo change for dr?
-    env.REGISTRY = "ghcr.io"
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
     // service java image tag
@@ -16,7 +14,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
 
     // Using withRegistry() for auth on docker hub server.
     // Pull it to local images with short name and reopen it with full name, to exclude double naming problem
-    def buildContainer = docker.image(env.REGISTRY + '/rbkmoney/build-java:$BUILD_IMAGE_TAG')
+    def buildContainer = docker.image('rbkmoney/build-java:$BUILD_IMAGE_TAG')
     runStage('Pull build image') {
         withPrivateRegistry() {
             buildContainer.pull()
