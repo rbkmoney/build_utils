@@ -32,10 +32,10 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
                 withPrivateRegistry() {
                     postgresImage = docker.image(env.REGISTRY + '/rbkmoney/postgres:11.4')
                             .run(
-                                '-p 5432:5432 ' +
                                 '-e POSTGRES_PASSWORD=postgres ' +
                                 '-e POSTGRES_USER=postgres ' +
-                                '-e POSTGRES_DB=$DB_NAME '
+                                '-e POSTGRES_DB=$DB_NAME ' +
+                                '-v /etc/passwd:/etc/passwd:ro postgres '
                     )
                     insideParams = ' --link ' + postgresImage.id + ':$DB_HOST_NAME '
                 }
