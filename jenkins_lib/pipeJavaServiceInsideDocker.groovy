@@ -28,7 +28,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     runStage('Execute build container') {
         withMaven() {
             buildContainer.inside(insideParams) {
-                def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
+                def mvn_command_arguments = ' -e --batch-mode --settings  $SETTINGS_XML ' +
                         '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
                         '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
                         '-Ddb.url.host.name=$DB_HOST_NAME ' +
