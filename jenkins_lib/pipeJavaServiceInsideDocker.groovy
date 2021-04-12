@@ -22,55 +22,30 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
         }
     }
 
-    def postgresImage
-    try {
-        // Start db if necessary.
+    def insideParams = '--user "$(id -u):$(id -g)" -v /etc/passwd:/etc/passwd:ro '
 
-        def insideParams = ''
-        if (env.DB_HOST_NAME != null) {
-            runStage('Run PostgresDB container') {
-                withPrivateRegistry() {
-                    postgresImage = docker.image(env.REGISTRY + '/rbkmoney/postgres:11.4')
-                            .run(
-                                '-e POSTGRES_PASSWORD=postgres ' +
-                                '-e POSTGRES_USER=postgres ' +
-                                '-e POSTGRES_DB=$DB_NAME ' +
-                                '-v /etc/passwd:/etc/passwd:ro postgres '
-                    )
-                    insideParams = ' --link ' + postgresImage.id + ':$DB_HOST_NAME '
-                }
-            }
-        }
-        // Run mvn and generate docker file
-        runStage('Execute build container') {
-            withMaven() {
-                buildContainer.inside(insideParams) {
-                    def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
-                            '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
-                            '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
-                            '-Ddb.url.host.name=$DB_HOST_NAME ' +
-                            " ${mvnArgs}"
-                    if (env.BRANCH_NAME == 'master') {
-                        withGPG(){
-                            sh 'mvn deploy' + mvn_command_arguments +
+    // Run mvn and generate docker file
+    runStage('Execute build container') {
+        withMaven() {
+            buildContainer.inside(insideParams) {
+                def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
+                        '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
+                        '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
+                        '-Ddb.url.host.name=$DB_HOST_NAME ' +
+                        " ${mvnArgs}"
+                if (env.BRANCH_NAME == 'master') {
+                    withGPG() {
+                        sh 'mvn deploy' + mvn_command_arguments +
                                 ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
-                        }
-                    } else {
-                        sh 'mvn verify' + mvn_command_arguments + ' -Dgpg.skip=true'
                     }
+                } else {
+                    sh 'mvn verify' + mvn_command_arguments + ' -Dgpg.skip=true'
                 }
             }
         }
-        // Run security tests and quality analysis
-        runJavaSecurityTools(mvnArgs)
     }
-    finally {
-        if (postgresImage != null) {
-            runStage('Stop PostgresDB container') {
-                postgresImage.stop()
-            }
-        }
-    }
+    // Run security tests and quality analysis
+    runJavaSecurityTools(mvnArgs)
 
     def serviceImage;
     def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID';
@@ -94,7 +69,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
                     sh "docker rmi -f " + env.REGISTRY + "/${imgShortName} || true"
                 }
             }
-            if (env.REPO_PUBLIC == 'true'){
+            if (env.REPO_PUBLIC == 'true') {
                 runStage('Push image to public docker registry') {
                     withPublicRegistry() {
                         serviceImage.push()
