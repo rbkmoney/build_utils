@@ -10,7 +10,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     env.DB_NAME = serviceName
     // host url for database. If null - DB will not start
     env.DB_HOST_NAME = dbHostName
-    // mvnArgs - arguments for mvn install in build container. For example: ' -DjvmArgs="-Xmx256m" '
+    // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
 
     // Using withRegistry() for auth on docker hub server.
     // Pull it to local images with short name and reopen it with full name, to exclude double naming problem
@@ -22,13 +22,14 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
         }
     }
 
-    def insideParams = ' -v /etc/passwd:/etc/passwd:ro '
+    // Start db if necessary.
 
+    def insideParams = ''
     // Run mvn and generate docker file
     runStage('Execute build container') {
         withMaven() {
             buildContainer.inside(insideParams) {
-                def mvn_command_arguments = ' -e --batch-mode --settings  $SETTINGS_XML ' +
+                def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
                         '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
                         '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
                         '-Ddb.url.host.name=$DB_HOST_NAME ' +
