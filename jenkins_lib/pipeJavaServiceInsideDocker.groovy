@@ -22,7 +22,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
         }
     }
 
-    def insideParams = '--user "$(id -u):$(id -g)" -v /etc/passwd:/etc/passwd:ro '
+    def insideParams = ' -v /etc/passwd:/etc/passwd:ro '
 
     // Run mvn and generate docker file
     runStage('Execute build container') {
