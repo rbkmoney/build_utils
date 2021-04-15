@@ -49,14 +49,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
                             '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
                             '-Ddb.url.host.name=$DB_HOST_NAME ' +
                             " ${mvnArgs}"
-                    if (env.BRANCH_NAME == 'master') {
-                        withGPG(){
-                            sh 'mvn deploy' + mvn_command_arguments +
-                                ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
-                        }
-                    } else {
-                        sh 'mvn verify' + mvn_command_arguments + ' -Dgpg.skip=true'
-                    }
+                    sh 'mvn verify' + mvn_command_arguments + ' -Dgpg.skip=true'
                 }
             }
         }
