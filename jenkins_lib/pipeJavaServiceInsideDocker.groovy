@@ -24,7 +24,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
 
     // Start db if necessary.
 
-    def insideParams = ''
+    def insideParams = ' -v /var/usr/docker.sock:/var/usr/docker.sock '
     // Run mvn and generate docker file
     runStage('Execute build container') {
         withMaven() {
