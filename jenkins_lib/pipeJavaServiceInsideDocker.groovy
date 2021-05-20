@@ -28,7 +28,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
     // Run mvn and generate docker file
     runStage('Execute build container') {
         withMaven() {
-            buildContainer.inside(insideParams) {
+            buildContainer.inside(insideParams).withRun('-u 1010:200')  {
                 def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
                         '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
                         '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
