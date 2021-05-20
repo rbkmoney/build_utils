@@ -13,7 +13,7 @@ def call(String buildImageTag, String mvnArgs = "") {
 
     runStage('Execute build container') {
         withMaven() {
-            buildContainer.inside() {
+            buildContainer.inside().withRun('-u 1010:200') {
                 if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith('epic')) {
                     withGPG() {
                         sh 'mvn deploy --batch-mode --settings $SETTINGS_XML ' + "${mvnArgs}" + 
