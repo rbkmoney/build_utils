@@ -24,11 +24,11 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
 
     // Start db if necessary.
 
-    def insideParams = ' -v /var/run/docker.sock:/var/run/docker.sock '
+    def insideParams = ' -u 1010:200 -v /var/run/docker.sock:/var/run/docker.sock '
     // Run mvn and generate docker file
     runStage('Execute build container') {
         withMaven() {
-            buildContainer.inside(insideParams).withRun('-u 1010:200')  {
+            buildContainer.inside(insideParams) {
                 def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
                         '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
                         '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
