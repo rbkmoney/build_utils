@@ -1,15 +1,14 @@
 // Not actual (but maybe useful in the future) pipeline for Java service
-def call(String serviceName, String baseImageTag, String buildImageTag, String dbHostName, String mvnArgs = "") {
+def call(String serviceName,
+         String serviceBaseImageTag = "c0612d6052ac049496b72a23a04acb142035f249", // https://github.com/rbkmoney/image-service-java
+         String buildImageTag = "5e2fe04647f525e6b55864b1f57478c8d1e5076a", // https://github.com/rbkmoney/image-build-java
+         String mvnArgs = "") {
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
     // service java image tag
-    env.BASE_IMAGE_TAG = baseImageTag
+    env.BASE_IMAGE_TAG = serviceBaseImageTag
     // build container image tag
     env.BUILD_IMAGE_TAG = buildImageTag
-    // data base name
-    env.DB_NAME = serviceName
-    // host url for database. If null - DB will not start
-    env.DB_HOST_NAME = dbHostName
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
 
     // Using withRegistry() for auth on docker hub server.
@@ -31,8 +30,7 @@ def call(String serviceName, String baseImageTag, String buildImageTag, String d
             buildContainer.inside(insideParams) {
                 def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
                         '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
-                        '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
-                        '-Ddb.url.host.name=$DB_HOST_NAME ' +
+                        '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG '
                         " ${mvnArgs}"
                 if (env.BRANCH_NAME == 'master') {
                     withGPG() {
