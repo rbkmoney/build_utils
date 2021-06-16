@@ -1,4 +1,4 @@
-// Default pipeline for Java service
+// Deprecated pipeline for Java service
 def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
