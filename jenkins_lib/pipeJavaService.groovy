@@ -16,14 +16,7 @@ def call(String serviceName, Boolean useJava11 = false, String mvnArgs = "") {
                 def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
                         " -Dgit.branch=${env.BRANCH_NAME} " +
                         " ${mvnArgs}"
-                if (env.BRANCH_NAME == 'master') {
-                    withGPG() {
-                        sh 'mvn deploy' + mvn_command_arguments +
-                                ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
-                    }
-                } else {
-                    sh 'mvn verify' + mvn_command_arguments + ' -Dgpg.skip=true'
-                }
+                sh 'mvn verify' + mvn_command_arguments + ' -Dgpg.skip=true'
             }
         }
     }

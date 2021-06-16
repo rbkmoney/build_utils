@@ -28,16 +28,9 @@ def call(String serviceName,
             buildContainer.inside(insideParams) {
                 def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
                         '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
-                        '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG '
+                        '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
                 " ${mvnArgs}"
-                if (env.BRANCH_NAME == 'master') {
-                    withGPG() {
-                        sh 'mvn deploy' + mvn_command_arguments +
-                                ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
-                    }
-                } else {
-                    sh 'mvn verify' + mvn_command_arguments + ' -Dgpg.skip=true'
-                }
+                sh 'mvn verify' + mvn_command_arguments + ' -Dgpg.skip=true'
             }
         }
     }
