@@ -1,8 +1,8 @@
 // Actual pipeline for Java service
 def call(String serviceName,
-         String mvnArgs = "",
+         String mvnArgs = "", // arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
          String serviceBaseImageTag = "1d57d77a38eb7b351eca3c1a9a3e45ec441ed9aa", // https://github.com/rbkmoney/image-service-java
-         String buildImageTag = "e26b9f98e2da13f570197ce62c8f6247bbf93108", // https://github.com/rbkmoney/image-build-java
+         String buildImageTag = "e26b9f98e2da13f570197ce62c8f6247bbf93108" // https://github.com/rbkmoney/image-build-java
 ) {
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
@@ -10,7 +10,6 @@ def call(String serviceName,
     env.BASE_IMAGE_TAG = serviceBaseImageTag
     // build container image tag
     env.BUILD_IMAGE_TAG = buildImageTag
-    // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
 
     // Using withRegistry() for auth on docker hub server.
     // Pull it to local images with short name and reopen it with full name, to exclude double naming problem
@@ -22,8 +21,6 @@ def call(String serviceName,
         }
     }
 
-    // Start db if necessary.
-
     def insideParams = ' --group-add 200 -v /var/run/docker.sock:/var/run/docker.sock '
     // Run mvn and generate docker file
     runStage('Execute build container') {
@@ -32,7 +29,7 @@ def call(String serviceName,
                 def mvn_command_arguments = ' --batch-mode --settings  $SETTINGS_XML ' +
                         '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
                         '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG '
-                        " ${mvnArgs}"
+                " ${mvnArgs}"
                 if (env.BRANCH_NAME == 'master') {
                     withGPG() {
                         sh 'mvn deploy' + mvn_command_arguments +
@@ -47,7 +44,7 @@ def call(String serviceName,
     // Run security tests and quality analysis
     runJavaSecurityTools(mvnArgs)
 
-    def serviceImage;
+    def serviceImage
     def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID';
     getCommitId()
     runStage('Build Service image') {
