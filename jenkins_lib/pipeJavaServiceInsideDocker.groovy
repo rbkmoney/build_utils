@@ -1,8 +1,9 @@
-// Not actual (but maybe useful in the future) pipeline for Java service
+// Actual pipeline for Java service
 def call(String serviceName,
-         String serviceBaseImageTag = "c0612d6052ac049496b72a23a04acb142035f249", // https://github.com/rbkmoney/image-service-java
-         String buildImageTag = "5e2fe04647f525e6b55864b1f57478c8d1e5076a", // https://github.com/rbkmoney/image-build-java
-         String mvnArgs = "") {
+         String mvnArgs = "",
+         String serviceBaseImageTag = "1d57d77a38eb7b351eca3c1a9a3e45ec441ed9aa", // https://github.com/rbkmoney/image-service-java
+         String buildImageTag = "e26b9f98e2da13f570197ce62c8f6247bbf93108", // https://github.com/rbkmoney/image-build-java
+) {
     // service name - usually equals artifactId
     env.SERVICE_NAME = serviceName
     // service java image tag
