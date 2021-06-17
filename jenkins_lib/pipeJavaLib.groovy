@@ -14,7 +14,7 @@ def call(String buildImageTag, String mvnArgs = "") {
     runStage('Execute build container') {
         withMaven() {
             buildContainer.inside() {
-                if (env.BRANCH_NAME == 'master') {
+                if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith('epic')) {
                     withGPG() {
                         sh 'mvn deploy --batch-mode --settings $SETTINGS_XML ' + "${mvnArgs}" + 
                             ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
