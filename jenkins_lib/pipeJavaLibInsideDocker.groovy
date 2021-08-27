@@ -7,11 +7,11 @@ def call(String mvnArgs = "", // arguments for mvn install in build container. F
 
     // Using withRegistry() for auth on docker hub server.
     // Pull it to local images with short name and reopen it with full name, to exclude double naming problem
-    def buildContainer = docker.image('rbkmoney/build-java:$BUILD_IMAGE_TAG')
+    def buildContainer = docker.image('rbkmoney/build:$BUILD_IMAGE_TAG')
     runStage('Pull build image') {
         withPrivateRegistry() {
             buildContainer.pull()
-            buildContainer = docker.image(env.REGISTRY + '/rbkmoney/build-java:$BUILD_IMAGE_TAG')
+            buildContainer = docker.image(env.REGISTRY + '/rbkmoney/build:$BUILD_IMAGE_TAG')
         }
     }
 
