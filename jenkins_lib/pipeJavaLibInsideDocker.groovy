@@ -1,6 +1,6 @@
 //Default pipeline for Java library
 def call(String mvnArgs = "", // arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
-         String buildImageTag = "e26b9f98e2da13f570197ce62c8f6247bbf93108" // https://github.com/rbkmoney/image-build-java
+         String buildImageTag = "25c031edd46040a8745334570940a0f0b2154c5c" // https://github.com/rbkmoney/image-build
 ) {
     // build container image tag
     env.BUILD_IMAGE_TAG = buildImageTag
