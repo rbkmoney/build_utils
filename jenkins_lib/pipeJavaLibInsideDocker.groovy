@@ -14,8 +14,9 @@ def call(String mvnArgs = "", // arguments for mvn install in build container. F
             buildContainer = docker.image(env.REGISTRY + '/rbkmoney/build-java:$BUILD_IMAGE_TAG')
         }
     }
-
-    def insideParams = ' --group-add 200 -v /var/run/docker.sock:/var/run/docker.sock '
+    // Quick fix related to https://github.com/rbkmoney/image-build-java/blob/a9b8771e24a69101c9327d9501a30afb4c5cd685/Dockerfile#L70
+    def m2home = sh(returnStdout: true, script: "echo $HOME/.m2").trim()
+    def insideParams = " --group-add 200 -v /var/run/docker.sock:/var/run/docker.sock -v ${m2home}:/home/postgres/.m2:rw"
     runStage('Execute build container') {
         withMaven() {
             buildContainer.inside(insideParams) {
@@ -25,7 +26,7 @@ def call(String mvnArgs = "", // arguments for mvn install in build container. F
                                 ' -Dgpg.keyname="$GPG_KEYID" -Dgpg.passphrase="$GPG_PASSPHRASE" '
                     }
                 } else {
-                    sh 'mvn verify --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}" + ' -Dgpg.skip=true'
+                    sh 'mvn verify install --batch-mode --settings  $SETTINGS_XML ' + "${mvnArgs}" + ' -Dgpg.skip=true'
                 }
             }
         }
