@@ -1,17 +1,17 @@
 //Default pipeline for Java library
 def call(String mvnArgs = "", // arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
-         String buildImageTag = "a9b8771e24a69101c9327d9501a30afb4c5cd685" // https://github.com/rbkmoney/image-build-java
+         String buildImageTag = "25c031edd46040a8745334570940a0f0b2154c5c" // https://github.com/rbkmoney/image-build-java
 ) {
     // build container image tag
     env.BUILD_IMAGE_TAG = buildImageTag
 
     // Using withRegistry() for auth on docker hub server.
     // Pull it to local images with short name and reopen it with full name, to exclude double naming problem
-    def buildContainer = docker.image('rbkmoney/build-java:$BUILD_IMAGE_TAG')
+    def buildContainer = docker.image('rbkmoney/build:$BUILD_IMAGE_TAG')
     runStage('Pull build image') {
         withPrivateRegistry() {
             buildContainer.pull()
-            buildContainer = docker.image(env.REGISTRY + '/rbkmoney/build-java:$BUILD_IMAGE_TAG')
+            buildContainer = docker.image(env.REGISTRY + '/rbkmoney/build:$BUILD_IMAGE_TAG')
         }
     }
 
