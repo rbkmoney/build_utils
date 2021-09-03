@@ -21,7 +21,9 @@ def call(String serviceName,
         }
     }
 
-    def insideParams = ' --group-add 200 -v /var/run/docker.sock:/var/run/docker.sock '
+    // Quick fix related to https://github.com/rbkmoney/image-build-java/blob/a9b8771e24a69101c9327d9501a30afb4c5cd685/Dockerfile#L70
+    def m2home = sh(returnStdout: true, script: "echo $HOME/.m2").trim()
+    def insideParams = " --group-add 200 -v /var/run/docker.sock:/var/run/docker.sock -v ${m2home}:/home/postgres/.m2:rw"
     // Run mvn and generate docker file
     runStage('Execute build container') {
         withMaven() {
@@ -30,7 +32,7 @@ def call(String serviceName,
                         '-Ddockerfile.base.service.tag=$BASE_IMAGE_TAG ' +
                         '-Ddockerfile.build.container.tag=$BUILD_IMAGE_TAG ' +
                 " ${mvnArgs}"
-                sh 'mvn verify' + mvn_command_arguments + ' -Dgpg.skip=true'
+                sh 'mvn verify install' + mvn_command_arguments + ' -Dgpg.skip=true'
             }
         }
     }

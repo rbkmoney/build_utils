@@ -1,4 +1,4 @@
-//Default pipeline for Java library
+//Deprecated pipeline for Java library
 def call(String buildImageTag, String mvnArgs = "") {
 
     // mvnArgs - arguments for mvn install in build container. For exmple: ' -DjvmArgs="-Xmx256m" '
