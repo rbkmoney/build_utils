@@ -40,7 +40,8 @@ def call(String serviceName,
     runJavaSecurityTools(mvnArgs)
 
     def serviceImage
-    def imgShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID';
+    def defaultImageShortName = 'rbkmoney/' + env.SERVICE_NAME + ':' + '$COMMIT_ID'
+    def imgShortName = env.BRANCH_NAME.startsWith('epic') ? defaultImageShortName + '-epic' : defaultImageShortName
     getCommitId()
     runStage('Build Service image') {
         withPrivateRegistry() {
@@ -52,7 +53,7 @@ def call(String serviceName,
     getJavaSecurityResults(mvnArgs)
 
     try {
-        if (env.BRANCH_NAME == 'master') {
+        if (env.BRANCH_NAME == 'master' || env.BRANCH_NAME.startsWith('epic')) {
             runStage('Push Service image to private registry') {
                 withPrivateRegistry() {
                     serviceImage.push()
