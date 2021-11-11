@@ -3,7 +3,7 @@ def call(modules, jenkins_lib = null, sh_tools = null) {
     env.SH_TOOLS = sh_tools ?: env.SH_TOOLS ?: "build_utils/sh"
     modules.each { mod ->
         if (!binding.hasVariable("${mod}")) {
-            evaluate("def ${mod} = load(${env.JENKINS_LIB}/${mod}.groovy)")
+            evaluate("def ${mod} = load(\"${env.JENKINS_LIB}/${mod}.groovy\")")
         }
     }
 }
