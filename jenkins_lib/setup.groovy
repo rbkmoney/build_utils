@@ -7,3 +7,5 @@ def call(modules, jenkins_lib = null, sh_tools = null) {
         }
     }
 }
+
+return this;
