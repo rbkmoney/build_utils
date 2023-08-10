@@ -4,7 +4,8 @@ source "${UTILS_PATH}/sh/functions.sh"
 
 function VerifyHashOfStage3() {
     # First param is package tarball, 2nd is the *.DIGEST file
-    test_sum=$(awk -v myvar="$1" '$2==myvar {for(i=1; i<=1; i++) { print $1; exit}}' "${2}")
+    # test_sum=$(awk -v myvar="$1" '$2==myvar {for(i=1; i<=1; i++) { print $1; exit}}' "${2}")
+    test_sum=$(grep "# SHA512 HASH" -A 1 "${2}" | awk -v myvar="$1" '$2==myvar {for(i=1; i<=1; i++) { print $1; exit}}')
     if which sha512sum > /dev/null 2>&1; then
 	calculated_sum=$(sha512sum "${1}" | awk '{print $1}' -)
     elif which shasum  > /dev/null 2>&1; then
